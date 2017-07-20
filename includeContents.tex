@@ -1,0 +1,21 @@
+% Define the chapter heading image to be used for all (subsequent) chapters.
+\chapterimage{ChapterImage} % Chapter heading image
+
+% Don't use these commands because using \mainmatter corrupts the
+% index.
+%\frontmatter
+
+% The main meat of the book begins here.
+%\mainmatter
+
+\part{Oracle Trace Files}
+\input{Content/Introduction}
+\include{Content/OracleTraceFiles}
+
+
+% All the backend stuff, appendices, indexes etc.
+%\backmatter
+
+\part{Appendices}
+\chapterimage{ChapterImage} % Chapter heading image
+\input{Content/Appendices}

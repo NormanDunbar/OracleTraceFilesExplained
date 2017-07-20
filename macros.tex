@@ -1,0 +1,40 @@
+%----------------------------------------------------------------------------------------
+% NDunbar: A few useful (?) macros to save typing.
+%----------------------------------------------------------------------------------------
+
+%----------------------------------------------------------------------------------------
+% These need to be used with the text *twice*, Once to add it to the main document "as is" 
+% and once again to add it to the main index, under the sub-index named. For example:
+%
+% The C and C++ compiler used for AVR programming is is avr-gcc\program{avr-gcc} ...
+%----------------------------------------------------------------------------------------
+\DeclareRobustCommand{\program}[1]{\index{Programs and applications!#1}\index{#1}}
+\DeclareRobustCommand{\person}[1]{\index{People!#1}}
+\DeclareRobustCommand{\traceline}[1]{\index{Trace File Entries!#1}\index{#1}}
+\DeclareRobustCommand{\mc6800x}[1]{\index{MC6800x Instructions!#1}}
+\DeclareRobustCommand{\address}[1]{\index{Addressing Modes!#1}}
+
+%----------------------------------------------------------------------------------------
+% These generate the text in the main body in teletype mode as well as 
+% adding them to the index:
+% Use \vector(BP\_INIT} to link new functions to SuperBasic.
+%----------------------------------------------------------------------------------------
+\DeclareRobustCommand{\vector}[1]{\texttt{#1}\index{Vectored Utilities!#1}}
+\DeclareRobustCommand{\trap}[1]{\texttt{#1}\index{Trap Calls!#1}}
+\DeclareRobustCommand{\pe}[1]{\texttt{#1}\index{Pointer Environment Vectors!#1}}
+
+%----------------------------------------------------------------------------------------
+% These generate text in a certain style, see the actual command for details,
+% when used. These do not get indexed.
+%----------------------------------------------------------------------------------------
+\DeclareRobustCommand{\opcode}[1]{\texttt{#1}}
+\DeclareRobustCommand{\inline}[1]{\texttt{#1}}
+
+
+
+%----------------------------------------------------------------------------------------
+% When using PanDoc to convert from RST to LaTeX,it generated a \tightlist for bullet
+%  lists. Unfortunately, that's not known (at least in MikTex) so this helps.
+%----------------------------------------------------------------------------------------
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}

@@ -1,0 +1,1386 @@
+\chapter{Oracle Trace Files Explained}\label{oracle-trace-files-explained}
+
+\section{Trace File Sections}\label{trace-file-sections}
+
+The trace file is made up of two main sections, the header and the trace details.
+
+\subsection{The Header}\label{the-header}\index{Header, Trace File}\index{Trace File Header}
+
+The header is the top of the file and consists of a few lines of text giving details of where the trace file came from, which server (operating System) it was created on, various details about the server and the database and so on.
+
+The following is an example of a trace file created on a Windows server, running Oracle 11.2.0.4. Server, database and other potentially sensitive information has been obfuscated to protect the guilty, me!
+
+\begin{lstlisting}[numbers=none,caption={Trace File Header}]
+Trace file C:\ORACLEDATABASE\diag\rdbms\cfg\cfg\trace\cfg_ora_27680_FREESPACE.trc
+Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
+Windows NT Version V6.2  
+CPU                 : 8 - type 8664, 8 Physical Cores
+Process Affinity    : 0x0x0000000000000000
+Memory (Avail/Total): Ph:29917M/57343M, Ph+PgF:24634M/65535M 
+Instance name: orcl
+Redo thread mounted by this instance: 1
+Oracle process number: 373
+Windows thread id: 27680, image: ORACLE.EXE (SHAD)
+
+
+*** 2017-06-27 13:56:36.872
+*** SESSION ID:(1017.1085) 2017-06-27 13:56:36.872
+*** CLIENT ID:() 2017-06-27 13:56:36.872
+*** SERVICE NAME:(ORCLSRV) 2017-06-27 13:56:36.872
+*** MODULE NAME:(TOAD background query session) 2017-06-27 13:56:36.872
+*** ACTION NAME:() 2017-06-27 13:56:36.872
+
+=====================
+\end{lstlisting}
+
+The last line, consisting of equals signs, is the separator between the header and the following trace details.
+
+\subsubsection{Timestamp Lines}\label{timestamp-lines}\index{Timestamps}
+
+One line that you should be interested in is this one from the above:
+
+\begin{lstlisting}[numbers=none,caption={Time Stamp Line}]
+*** 2017-06-27 13:56:36.872
+\end{lstlisting}
+
+This is the first timestamp line in the trace file and sets the baseline for all the \inline{tim} fields (these will be explained below) that follow, however, briefly, the \inline{tim} values are in microseconds (millionths of a second) from a specific ``epoch'' - which depends on the operating system - and there isn't a consistent, operating system independent, method of converting \inline{tim} values from a huge number of microseconds to an actual date and time that humans will understand.
+
+There are usually a few timestamp lines written to the trace file, depending on how long it has been processing for, and these mean that we can, with a bit of fiddling, relate a \inline{tim} value to an actual time on the clock.
+
+\subsection{Trace Details}\label{trace-details}
+
+The majority of the trace file consists of the full trace details for the session that was traced. There are numerous lines of text here, each different, each with their own fields of one kind or another.
+
+These are explained in the following sections.
+
+\begin{note}
+Remember, when Oracle writes a line to the trace file, it is done at the \emph{end} of the process that was indicated by the written line. For example, if you see a \inline{FETCH} line in the trace file, that was written at the tim (\inline{tim}) that the \inline{FETCH} completed. The trace file should be considered a list of things \emph{that happened} and not \emph{things that are about to happen}.
+\end{note}
+
+
+\subsubsection{Recursive SQL}\label{recursive-sql}\index{SQL!Recursive}\index{Recursive SQL}
+
+Your SQL statements are normally executed as top-level statements, but Oracle might need to execute some (a lot!) of recursive SQL statements, in order that your statement can be processed. 
+
+If, for example, you drop a user in a database with the \inline{drop user xxx cascade} statement, Oracle goes off and executes hundreds of separate SQL statement to find out what objects the user owns, or has privileges to, and undoes all of those before finally dropping the contents of the user and finally the user itself.
+
+Top-level SQL\index{SQL!Top Level}\index{Top Level SQL} statements are identified by having a depth of zero. This can be seen in many of the trace file lines as \inline{dep=0} in the various lines of the trace file.
+
+Recursive statements, executed in the background, have a depth greater than zero, and some of these require recursive statements of their own, and so on.
+
+This recursion leads to a foible in the trace file, your statement appears last and all the possibly nested, recursive statements will normally appear first. This is simply because in order for your statement to be executed, the recursive statements have to run to completion \emph{first}.
+
+For example, in a trace file I have open in front of me, the first statement with a \inline{dep=0} occurs at line 709 in the file. Everything prior to that runs at \inline{dep=3}, \inline{dep=2} or \inline{dep=1} and complete before I can see my own SQL statement. 
+
+Under normal circumstances, a statement that is parsed (executed etc) at \inline{dep=n} has been called recursively, to facilitate a statement, that will follow in the trace file, that is itself parsed (executed etc) at \inline{dep=n-1}.
+
+\subsubsection{Waits}\label{waits}\index{Waits}
+
+\inline{WAIT} lines in a trace file are similar, in that the
+\inline{WAIT} must complete, and so is written to the trace file
+\emph{before} the statement that incurred the wait. For example, a
+\inline{FETCH} that had to wait for
+\inline{db file scattered read} events, will appear later in the
+trace file that the individual \inline{WAIT} lines that the
+\inline{FETCH} suffered from.
+
+\subsubsection{Cursor Ids}\label{cursor-ids}\index{Cursor IDs}
+
+Every time you see a `\#' followed by a number, you are looking at a cursor ID. In previous versions of Oracle, these were simply an ever increasing number, starting from 1 and increasing by 1 for each new cursor.
+
+In Oracle 11g, the cursor \emph{appears} to be an address in memory\footnote{But don't quote me on this, I saw it written down somewhere on the Oracle Support web site, but now that I need it, I cannot find it again. Sigh!}, and \emph{will be reused} as cursors are closed and new ones opened. You cannot assume, therefore, that a cursor with a specific ID at the end of the trace file, relates to any other lines with that same ID previously written to the trace file, without checking for any intervening \inline{CLOSE} lines with the same ID - that's just how it is now!
+
+\subsubsection{Active or Inactive}\label{active-or-inactive}
+
+You might want to look in the \inline{STATUS} column in \inline{V\$SESSION} to determine if the session is active - doing \emph{something} - or not. However, you must be aware that the \inline{STATUS} column only gives an active reading when the statement is in a \inline{PARSE}, \inline{EXEC} or \inline{FETCH} phase of execution. If the statement is in a \inline{WAIT}, for example, it will show as inactive - but it is actually still processing the current statement. Something to bear in mind.
+
+\section{Trace File Details}\label{trace-file-details}
+
+\chapter{Trace File Entries}
+
+\section{PARSING IN CURSOR}\label{parsing-in-cursor}\index{Parsing in Cursor}
+
+This is \emph{usually} the first line you will see for a cursor. It shows the full SQL statement between the \inline{PARSING IN CURSOR} line and the \inline{END OF STMT} line. The SQL is displayed exactly as the user (or application) entered it. However, if the statement is invalid, or cannot be parsed, you will not see this, or the \inline{PARSE} line in the trace file, you will only see a \inline{PARSE ERROR} line instead.
+
+This is not the actual \inline{PARSE} for the cursor though, that normally follows on later, usually!
+
+As an example, here is the \inline{PARSING IN CURSOR} line for the SQL query that Toad runs in the background to extract the free space used in the database by various tablespaces, including temporary ones. However, I'm not showing the SQL here:
+
+\begin{lstlisting}[numbers=none,caption={Parsing In Cursor Line}]
+PARSING IN CURSOR #3220341128 len=3081 dep=0 uid=0 oct=3 lid=0 tim=3520788574727 hv=3219027813 ad='7ffcb6778350' sqlid='7bwtj5azxwxv5'
+\end{lstlisting}
+
+The various fields defined, and their descriptions can be seen in the table below.
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Parsing in Cursor - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Parsing in Cursor - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+len\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The size, in bytes? Characters? of the SQL statement.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+uid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The user id of the user parsing the statement.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oct\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Oracle Command Code of the SQL Statement. (See Appendices.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+lid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Unknown.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, for this statement to be parsed. This is not the
+time it took!\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+hv\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Hash Value for the statement.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+ad\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Cursor address in memory?\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+sqlid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The SQL ID for the statement.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
+
+The \inline{lid} field is unknown at present. It's probably an ID of some kind, but for what?
+
+As mentioned, the cursor ID field has a value that may (or may not) be an address in memory. However, that's not the same as the \inline{ad} field, which is (I think) an address in memory for the cursor.
+
+The \inline{sqlid} field is the same as the \inline{SQL\_ID} column in \inline{V\$SQL}. The \inline{hv} field is the hash value that Oracle used to determine if this statement was to be found in the cache or not. It matches the \inline{SQL\_HASH\_VALUE} (and \inline{PREV\_HASH\_VALUE}) column in \inline{V\$SESSION} and also the \inline{HASH\_VALUE} column in \inline{V\$SQL}.
+
+Sometime Oracle will not write these lines to the trace file. If the cursor has been parsed, and subsequently coded, then re-parsed, you will see a \inline{PARSE} line but not a new \inline{PARSING IN CURSOR} for the statement. This \emph{appears} to be only on those occasions where the statement is re-parsed \emph{immediately} after being closed. I have not seen this ``feature'' when the cursor ID was used by a different statement in between.
+
+\section{PARSE}\label{parse}\traceline{PARSE}
+
+Normally, after the \inline{PARSING IN CURSOR} lines, you will see a \inline{PARSE} line for the same cursor ID. This is not always the case, for example, if you started the trace after the statement had been parsed, Oracle will write the \inline{PARSING IN CURSOR} lines, but not the \inline{PARSE}, to the trace file.
+
+A typical \inline{PARSE} line will look like this:
+
+\begin{lstlisting}[numbers=none,caption={Parse Line}]
+PARSE #491311368:c=0,e=452,p=0,cr=0,cu=0,mis=1,r=0,dep=0,og=1,plh=1388734953,tim=97734887542
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Parse - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Parse - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+c\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed CPU time. Microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+e\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, also in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of physical reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cr\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of consistent reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cu\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of current reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mis\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Whether this statement was found in the cache (0) or not (1). Indicates
+whether or not a hard parse was required. Seeing a 1 is bad,
+usually.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+r\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Rows processed.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+og\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Optimiser goal. 1 = ALL\_ROWS, 2 = FIRST\_ROWS, 3 = RULE, 4 = CHOOSE.
+Depending on your version of Oracle, you may not see some of the
+above.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+plh\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Execution plan hash value.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, when the parse for the statement completed.
+\textbf{Not} the time it took.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The \inline{plh} value is a value that corresponds to the column \inline{PLAN\_HASH\_VALUE} in \inline{V\$SQL\_PLAN}, \inline{V\$SQL\_PLAN\_STATISTICS\_ALL} and \inline{V\$SQLSTATS}. (There may be other views where this value appears, depending on the Oracle version in use.)
+
+The \inline{p}, \inline{cr} and \inline{cu} statistics are the usual ones for block reads, viz:
+
+\begin{itemize}
+\tightlist
+\item
+  Physical reads occur when Oracle must read a block, from disc, into   the buffer cache. This indicates also an additional \inline{cr} as   the block will be used unchanged.
+\item
+  Consistent reads are the number of blocks of UNDO that Oracle applied   to one or more blocks, in order to return the data in those blocks, to   the state they were in when the ``query'' started. The query in this   case, would be any or all recursive queries necessary to facilitate   the \inline{PARSE}.
+\item
+  Current Reads are blocks that Oracle used without needing to roll them   back to the start of the ``query''.
+\end{itemize}
+
+The fields for an \inline{PARSE} are the same as those for an \inline{EXEC} and a \inline{FETCH} - see below.
+
+The \inline{r} field is \emph{interesting}. Surely only a \inline{FETCH} would process some rows? I thought so too, and in all the trace files I've come across, I have yet to see (ok, yet to \emph{notice}) a \inline{PARSE} line with anything other than \inline{r=0}. I wonder why Oracle have it as part of the \inline{PARSE}? Maybe, because they use the same format of line for the \inline{PARSE} and \inline{EXEC} they decided just to use the same one, and set the row count for a \inline{PARSE} to zero?\footnote{We may never know!}
+
+\subsection{PARSE ERROR}\label{parse-error}\traceline{PARSE ERROR}
+
+If a \inline{PARSE} goes wrong for some reason, the trace file will show something like the following:
+
+\begin{lstlisting}[numbers=none,caption={Parse Error Line}]
+PARSE ERROR #491311368:len=26 dep=0 uid=755 oct=3 lid=755 tim=97734836031 err=1031
+SELECT LIVE_DEV FROM SITE
+\end{lstlisting}
+
+There will not normally be a \inline{PARSING IN CURSOR} or a \inline{PARSE} shown in the trace file for this statement.
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Parse Error - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Parse Error - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+len\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The length of the SQL statement in bytes, maybe characters depending on
+your characterset.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+uid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The user id of the user parsing the statement.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oct\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Oracle Command Code of the SQL Statement. (See Appendices.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+lid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Unknown.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, when this parse error was detected.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+err\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The Oracle error code that caused the parse to fail.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+In this case, there was an error \inline{ORA-01031: insufficient privileges} as the user parsing the statement did not have the required privileges to see the table in question.
+
+The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
+
+\section{EXEC}\label{exec}\traceline{EXEC}
+
+The \inline{EXEC} phase of a statement's execution is when Oracle dives into the database to build a result set of the desired data. It need not be the complete result set though, so beware of that.
+
+A typical \inline{EXEC} will resemble the following:
+
+\begin{lstlisting}[numbers=none,caption={Exec Line}]
+EXEC #3220341128:c=0,e=101,p=0,cr=0,cu=0,mis=0,r=0,dep=0,og=1,plh=2215247290,tim=3520788606189
+\end{lstlisting}
+
+Bear in mind, however, that the \inline{EXEC} elapsed times do not necessarily bear any resemblance to the entire time it took for the user to get a response. That response time includes the \inline{PARSE}, \inline{EXEC}, all the \inline{FETCH}es and all the \inline{WAIT}s that were encountered.
+
+The fields in an \inline{EXEC} are as follows:
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Exec - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Exec - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+c\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed CPU time. Microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+e\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, also in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of physical reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cr\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of consistent reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cu\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of current reads (blocks) that were necessary in order to
+carry out this \inline{PARSE}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mis\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Whether this statement was found in the cache (0) or not (1). Indicates
+whether or not a hard parse was required. Seeing a 1 is bad,
+usually.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+r\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Rows processed.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+og\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Optimiser goal. 1 = ALL\_ROWS, 2 = FIRST\_ROWS, 3 = RULE, 4 = CHOOSE.
+Depending on your version of Oracle, you may not see some of the
+above.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+plh\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Execution plan hash value.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, for this statement to be executed. This is
+\textbf{not} the time it took!\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The fields for an \inline{EXEC} are the same as those for a \inline{PARSE} (and \inline{FETCH} - see below).
+
+The \inline{r} field is \emph{interesting}. Surely only a \inline{FETCH} would process some rows? Not necessarily. Normally, when \inline{EXEC}ing a statement, the number of rows processed is indeed zero, but some PL/SQL, for example, returns a row count of 1. In my demonstration trace file I see 4 statements whose \inline{EXEC} has \inline{r=1} and all of them are of the format:
+
+\begin{lstlisting}[caption={PL/SQL Exec Example}]
+begin
+    do_something();
+end;
+\end{lstlisting}
+
+The ``do\_something()'' call is to \inline{DBMS\_MONITOR.START\_TRACE}, \inline{DBMS\_MONITOR.STOP\_TRACE} and calls to \inline{DBMS\_OUTPUT.GET\_LINE}. These statements have no \inline{FETCH} calls.
+
+You may wish to refer back to the details on the \inline{PARSE} line, above, for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
+
+\section{FETCH}\label{fetch}\traceline{FETCH}
+
+After processing the \inline{EXEC} call, and any associated \inline{WAIT}s, Oracle may \inline{FETCH} some, or all, of the rows returned by the query. A \inline{FETCH} line may resemble the following:
+
+\begin{lstlisting}[numbers=none,caption={Fetch Line}]
+FETCH #3220341128:c=1812500,e=28665431,p=11137,cr=50774,cu=316,mis=0,r=30,dep=0,og=1,plh=2215247290,tim=3520817271640
+\end{lstlisting}
+
+And anyone paying close attention will notice that the time it took to \inline{FETCH} 30 rows was a little excessive at 28.66 seconds. In case you are wondering, this is a query against \inline{DBA\_FREE\_SPACE} on an 11.2.0.4 database, and it is taking so long as it is hitting the \emph{never to be solved} \href{https://support.oracle.com/epmos/faces/BugDisplay?_afrLoop=109163696075238\&id=19125876\&_afrWindowMode=0\&_adf.ctrl-state=9eq93xdtt_165}{Bug 19125876} which affects 11.20.4 on AIX on Power Systems. Unfortunately, \emph{this} trace file is from a Windows server. The bug was logged on 30th June 2014, last updated on 26th June 2017, \emph{and is not yet fixed!}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Fetch - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{fetch - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+c\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed CPU time. Microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+e\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, also in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of physical reads (blocks) that were necessary in order to
+carry out this \inline{FETCH}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cr\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of consistent reads (blocks) that were necessary in order to
+carry out this \inline{FETCH}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cu\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of current reads (blocks) that were necessary in order to
+carry out this \inline{FETCH}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mis\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Whether this statement was found in the cache (0) or not (1).\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+r\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Rows processed.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+og\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Optimiser goal. 1 = ALL\_ROWS, 2 = FIRST\_ROWS, 3 = RULE, 4 = CHOOSE.
+Depending on your version of Oracle, you may not see some of the
+above.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+plh\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Execution plan hash value.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, that this one fetch was completed.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The fields for a \inline{FETCH} are also the same as those for a \inline{PARSE} and \inline{EXEC}.
+
+The \inline{mis} field is \emph{interesting}. Surely only a \inline{PARSE} would indicate a miss in the cache? Again, I think Oracle are using the same format of a trace line for \inline{PARSE}, \inline{EXEC} and \inline{FETCH} and simply ignoring or defaulting certain, non-applicable, fields.
+
+You may wish to refer back to the details on the \inline{PARSE} line, above, for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
+
+\section{WAIT}\label{wait}\traceline{WAIT}
+
+This is the meat of the trace file, usually. Under normal circumstances, it's usual for the various phases of execution (\inline{PARSE}, \inline{EXEC} and \inline{FETCH}) to encounter some \inline{WAIT} events. And I would say, personally\footnote{Beware of   small sample sizes!}, that these \inline{WAIT} states are where the vast majority of the total response time is encountered.
+
+A \inline{WAIT} line in the trace file will resemble the following example, up until Oracle 9i at the latest:
+
+\begin{lstlisting}[numbers=none,caption={Wait Line - Oracle 9i}]
+WAIT #3220341128: nam='db file sequential read' ela= 2769 p1=37 p2=12931 p3=1
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Wait - Fields for Oracle 9i\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Wait - Fields for Oracle 9i}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+nam\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The name of the wait event encountered.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+ela\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p1\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Event parameter 1.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p2\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Event parameter 2.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+p3\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Event parameter 3.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+The \inline{p1}, \inline{p2} and \inline{p3} parameters are different depending on the wait event name. You may require to loom them up in \inline{V\$EVENT\_NAME} to understand what they refer to. For the event above, we see the following:
+
+\begin{itemize}
+\tightlist
+\item
+  p1 is the file number;
+\item
+  p2 is the (starting) block number;
+\item
+  p3 is the number of blocks requested.
+\end{itemize}
+
+You may wish to use the following query to determine the various parameters for the \inline{WAIT} events seen in the trace file:
+
+\begin{lstlisting}[language=SQL,caption={Extracting Event Names for Oracle 9i}]
+select name, parameter1, parameter2, parameter3
+from   v$event_name
+where  name = 'db file sequential read';
+\end{lstlisting}
+
+Substitute the appropriate event name for your particular \inline{WAIT} event of course. And, don't forget, it \emph{is} case sensitive - Oracle are seriously inconsistent when it comes to naming events!
+
+In Oracle versions 10g onwards, the format is much easier to understand as the generic \inline{p1}, \inline{p2} and \inline{p3} have been replaced by something more meaningful, as follows for the same \inline{WAIT} event:
+
+\begin{lstlisting}[numbers=none,caption={Wait Line - Oracle 10g Onwards}]
+WAIT #3220341128: nam='db file sequential read' ela= 1023 file#=3 block#=12 blocks=1 obj#=-1 tim=3520817183625
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Parse - Fields for Oracle 10g Onwards\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Parse - Fields for Oracle 10g Onwards}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+nam\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The name of the wait event encountered.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+ela\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+file\#\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+For this wait, the file number.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+block\#\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+For this wait, the (starting) block number.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+blocks\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+For this wait, the number of blocks requested.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+obj\#\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+If appropriate, the object in question.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, that this one wait was completed.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\begin{note}
+The above is an example of one particular \inline{WAIT} event. Other events will have different parameters, as appropriate for the particular event. At least, from 10g onwards, we don't have to look up \inline{V\$WAIT\_NAME} every time we find a new event in our trace file. Oracle 11g added its own fields too.
+\end{note}
+
+The \inline{obj\#} refers to a specific object, where one is involved. In the above example, the value is -1, so there is no particular object in this \inline{WAIT}. We are waiting for a block off of the disc, which \emph{may} be part of an index or a table, etc, but for the sake of this \inline{WAIT}, Oracle considers that there is not a specific object involved.
+
+Where an \inline{obj\#} is not -1, then the value refers to the \inline{OBJECT\_ID} in the \inline{DBA\_OBJECTS} view.
+
+\section{ERROR}\label{error}\traceline{ERROR}
+
+If an error is detected while tracing a session, the trace file may show something like the following:
+
+\begin{lstlisting}[numbers=none,caption={Error Line}]
+ERROR #275452960:err=31013 tim=1075688943194
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Error - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Error - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+err\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The Oracle error code that caused the error.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, when this error was detected.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+In this example, the error relates to \inline{ORA-31013: Invalid XPATH expression} and indeed, is what the user saw on their terminal at the time - and was the reason I traced it because the application wasn't good enough in explaining which object caused the problem!
+
+\section{STAT}\label{stat}\traceline{STAT}
+
+In order to see the \inline{STAT} lines in your trace file, the \inline{TIMED\_STATISTICS} parameter for the database must be set to \inline{TRUE}.
+
+In Oracle 9i, there are no execution statistics or timings displayed in the \inline{op} field. These are only present from 10g onwards.
+
+The \inline{STAT} lines show you \emph{exactly} how Oracle went about getting the data back to you. It is possible for this to be different for the plan displayed by the \inline{EXPLAIN PLAN FOR ...} statement. In a trace file, it shows what happened, as opposed to what \emph{might} happen!
+
+A typical \inline{STAT} output could resemble the following:
+
+\begin{lstlisting}[numbers=none,caption={Stat Line}]
+STAT #5141189408 id=1 cnt=1 pid=0 pos=1 obj=20 op='TABLE ACCESS BY INDEX ROWID ICOL$ (cr=4 pr=0 pw=0 time=26 us cost=2 size=54 card=2)'
+STAT #5141189408 id=2 cnt=1 pid=1 pos=1 obj=42 op='INDEX RANGE SCAN I_ICOL1 (cr=3 pr=0 pw=0 time=22 us cost=1 size=0 card=2)'
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Stat - Fields for Oracle 9i\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Stat - Fields for Oracle 9i}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+id\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The identifier for this row of the explain plan may be referred to by
+the \inline{pid} field, in nested \inline{STAT} lines. Allows a
+hierarchy to be built.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cnt\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of rows processed by this step in explain plan.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pid\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The parent ID for this step on the plan. Should be zero on the
+\inline{id=1} line.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pos\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The position of this step, within the parent steps in the plan.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+obj\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The object identifier.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+op\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The operation performed by this step. This will include additional
+statistical and timing figures from 10g onwards. 9i is sadly deficient
+in this matter!\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Although the example \inline{STAT} lines above show only a couple of lines, it is possible for more than one to be present under a single parent step. In this case, the \inline{pid} would be the same, but the \inline{pos} would be different.
+
+\begin{warning}
+\inline{Pos} \emph{should} be a sequentiality increasing number, showing which step was executed when in order to facilitate the parent step, however, I have seen trace files where there have been more than one row with the same \inline{pid} \emph{and} the same \inline{pos}. This is \emph{a bad thing} when trying to figure out what happened when!
+\end{warning}
+
+In 10g and above, the additional fields in the \inline{op} field itself, are as follows:
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Stat - Fields for Oracl;e 10g Onwards\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Stat - Fields for Oracle 10g Onwards}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cr\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of consistent reads.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pr\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of physical reads.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pw\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of physical writes.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+time\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The elapsed time in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+cost\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cost of this step, as determined by the Cost Based Optimiser.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+size\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Form 11g, an estimate of the size, in bytes, of the data returned by
+this step.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+card\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The number of rows processed. 11g onwards.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{CLOSE}\label{close}\traceline{CLOSE}
+
+An example of a \inline{CLOSE} line from a trace file is as follows:
+
+\begin{lstlisting}[numbers=none,caption={Close Line}]
+CLOSE #3220452784:c=0,e=13,dep=0,type=0,tim=3520822918452
+\end{lstlisting}
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Close - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Close - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+\#nnnn\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+The cursor ID. This may be reused if for future cursors if this one is
+closed, and another opened.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+c\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed CPU time. Microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+e\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Elapsed wall clock time, also in microseconds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dep\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Recursion level. 0 = Top-level, user, SQL.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+type\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Close type.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, that this statement was closed. This is the time
+it was actually closed \textbf{not} when the close started.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+This line is written when a cursor used for an SQL statement, is no longer required and has been closed. The elapsed times relate to the time it took to close the cursor.
+
+The \inline{type} field is used to determine how the cursor was closed. It takes the following values:
+
+\begin{itemize}
+\tightlist
+\item
+  0 if the cursor was hard closed. This indicates that the cursor was   not saved in the server side closed cursor cache for later reuse. This can be because:
+
+  \begin{itemize}
+  \tightlist
+  \item
+    The statement is a DDL statement. DDL statements are never cached.
+  \item
+    \inline{SESSION\_CACHED\_CURSORS} is set to zero, and no caching is permitted.
+  \item
+    The statement could be cached, but as it has not been executed often enough (three times minimum), then it has not yet been cached.
+  \end{itemize}
+\item
+  1 if the cursor has been cached, as opposed to properly closed, in an empty slot in the cache.
+\item
+  2 if the cursor was cached, but caused another cursor to be aged out as there were no free slots.
+\item
+  3 if the cursor remains in the cache.
+\end{itemize}
+
+A cursor ID that has been closed may be re-used by a subsequent opening of a new cursor, which can be for a different statement, or for this one again. 
+
+\section{XCTEND}\label{xctend}\traceline{XCTEND}
+
+This line in a trace file indicates the end of a transaction. Sometimes you will see this:
+
+\begin{lstlisting}[numbers=none,caption={Commit Statement with Xctend Line}]
+PARSING IN CURSOR #398131288 len=6 dep=1 uid=90 oct=44 lid=90 tim=1484913807072 hv=255718823 ad='0' sqlid='8ggw94h7mvxd7'
+COMMIT
+END OF STMT
+PARSE #398131288:c=0,e=4,p=0,cr=0,cu=0,mis=0,r=0,dep=1,og=0,plh=0,tim=1484913807071
+XCTEND rlbk=0, rd_only=1, tim=1484913807100
+EXEC #398131288:c=0,e=27,p=0,cr=0,cu=0,mis=0,r=0,dep=1,og=0,plh=0,tim=1484913807121
+CLOSE #398131288:c=0,e=0,dep=1,type=3,tim=1484913807132
+\end{lstlisting}
+
+You can see here the entire \inline{PARSE}, \inline{EXEC} and \inline{CLOSE} for the statement. Sometimes, you don't see the \inline{COMMIT} (or \inline{ROLLBACK}) statement being parsed, all you see is the \inline{XCTEND} line in the trace file. Why? I have no idea - it's an Oracle thing!
+
+You should notice in the above, that the transaction was completed \emph{before} the \inline{EXEC} completed. remember that the trace file shows things after they have finished. So the \inline{EXEC} of the \inline{COMMIT} statement had to wait for the transaction to end before it could complete.
+
+The fields you will see in an \inline{XCTEND} line are as follows:
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Xctend - Fields\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Xctend - Fields}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+rlbk\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+0 indicates \inline{COMMIT}, 1 is for \inline{ROLLBACK}.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+rd\_only\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Whether or not the transaction was read only (1) or read write (0)
+regardless of \inline{COMMIT} or \inline{ROLLBACK} being executed
+to end it.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+tim\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Time, in microseconds, at which the transaction ended.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+\section{BINDS}\label{binds}\traceline{BINDS}
+
+To see the bind details in a trace file, you need to have enabled at least trace level 4 (for a 10046 event), or set \inline{binds => true} for \inline{DBMS\_SUPPORT} and \inline{DBMS\_MONITOR} calls to start tracing. You should also be \emph{using} binds in your SQL statement too of course!
+
+There is a \emph{lot} of information in the binds section of a trace file. For 9i, the following data are listed:
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Binds - Fields for Oracle 9i\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Binds - Fields for Oracle 9i}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+dty\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Data type code. (See Appendices.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mxl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Maximum length of the bind variable value. (private maximum length in
+parentheses.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mal\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Array length.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+scl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Scale. Only for numeric binds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pre\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Precision. Only for numeric binds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oacflg\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Special flag indicating bind options.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oacflg2\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Second part of oacflg.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+size\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Amount of memory to be allocated for this chunk of the bind.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+offset\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Offset into this chunk for this bind buffer.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+bfp\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind address.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+bln\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind buffer length.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+avl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Actual value length. A value of zero = NULL, or a PL/SQL OUT bind - if
+the cursor's command is 47 for PL/SQL Execution.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+flg\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind status flag.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+value\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Value of the bind variable.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+While for 10g upwards, we would expect to see the following:
+
+\begin{longtable}[]{@{}l|l@{}}
+\hline
+\caption{Binds - Fields for Oracle 10g Onwards\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Binds - Fields for Oracle 10g Onwards}
+\endlastfoot
+
+\toprule
+\begin{minipage}[b]{0.14\columnwidth}\raggedright\strut
+Code\strut
+\end{minipage} & \begin{minipage}[b]{0.65\columnwidth}\raggedright\strut
+Description\strut
+\end{minipage}\tabularnewline
+\midrule
+\endhead
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oacdty\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Data type code. (See Appendices.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mxl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Maximum length, in bytes, of the bind variable value. (Used length in
+parentheses.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mxlc\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Maximum length, in characters, of the bind variable value. (Used length
+in parentheses.)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+mal\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Array length.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+scl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Scale. Only for numeric binds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+pre\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Precision. Only for numeric binds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+oacflg\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Special flag indicating bind options.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+fl2\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Second part of oacflg.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+frm\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Unknown.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+csi\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Identifier code for the database's default or national character set.
+(See Appendices.) Only used in character/string binds.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+siz\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Size of memory to be allocated for this chunk.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+off\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Offset into the chunk of the bind buffer.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+kxsbbbfp\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind address.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+bln\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind buffer length.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+avl\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Actual value length. A value of zero = NULL, or a PL/SQL OUT bind - if
+the cursor's command is 47 for PL/SQL Execution.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+flg\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Bind status flag.\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+value\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+Value of the bind variable, or a memory dump. This field will only be
+shown for any bind that has a non-NULL value.\strut
+\end{minipage}\tabularnewline
+\bottomrule
+\end{longtable}
+
+Binds always number from left to right in an SQL statement. This means that the first bind found in the statement, will be listed in the trace file as \inline{BIND\#0} regardless of its actual name or number in the statement.
+
+If a bind, for example \inline{:3}, is used more than once in the \emph{same} SQL statement, then it will appear \emph{once} in the binds list - as \inline{BIND\#2}, however, the statement itself will refer to it correctly as \inline{:3} each time it is used.
+
+The \inline{oacdty} values are listed in the appendices for reference. There are quite a few of these, and you should note that experience has shown that the Oracle documentation doesn't always seem match up to the reality of a trace file.
+
+Always be aware, however, that just because a bind is defined to be a VARCHAR2, \inline{oacdty=01}, for example, it doesn't mean that the column in the table it relates to is also a VARCHAR2. Some people write code that passed VARCHAR2 values to a DATE column - this negating the ability to ever use an index (unless a function based index is created) on that DATE column!
+
+The \inline{mxl} fields shows how big the buffer assigned to this bind variable is, and how much of it has been used. This is measured in bytes. The \inline{mxlc} shows, where applicable, the buffer size and used size in characters\footnote{At least, that's what \emph{I} think it   shows!}. This will depend on the character set in use. If the character size is not appropriate, then \inline{mxlc} will be zero.
+
+\subsection{Examples}\label{examples}
+
+The following is an 11g example of the binds section for the following (recursive) SQL statement:
+
+\begin{lstlisting}[language=SQL,caption={Example of Recursive SQL Statement}]
+select o.owner#, o.name, o.namespace, o.obj#, d.d_timestamp, 
+       nvl(d.property,0), o.type#, o.subname, d.d_attrs  
+from   dependency$ d, obj$ o 
+where  d.p_obj#=:1 
+and    (d.p_timestamp=nvl(:2,d.p_timestamp) or d.property=2) 
+and    o.owner#=nvl(:3,o.owner#) 
+and    d.d_obj#=o.obj# 
+order  by o.obj#
+\end{lstlisting}
+
+The binds section, extracted from the trace file, looks as follows:
+
+\begin{lstlisting}[numbers=none,caption={Binds Lines}]
+BINDS #741210192:
+ Bind#0
+  oacdty=02 mxl=22(22) mxlc=00 mal=00 scl=00 pre=00
+  oacflg=00 fl2=0001 frm=00 csi=00 siz=56 off=0
+  kxsbbbfp=2c2d4c58  bln=22  avl=04  flg=05
+  value=104305
+ Bind#1
+  oacdty=12 mxl=07(07) mxlc=00 mal=00 scl=00 pre=00
+  oacflg=11 fl2=0001 frm=00 csi=00 siz=0 off=24
+  kxsbbbfp=2c2d4c70  bln=07  avl=07  flg=01
+  value="6/26/2017 9:58:26"
+ Bind#2
+  oacdty=02 mxl=22(22) mxlc=00 mal=00 scl=00 pre=00
+  oacflg=01 fl2=0001 frm=00 csi=00 siz=0 off=32
+  kxsbbbfp=2c2d4c78  bln=22  avl=00  flg=01
+\end{lstlisting}
+
+Looking specifically at the above, we can see the following:
+
+\begin{itemize}
+\tightlist
+\item
+  We have two \inline{NUMBER} binds, and one \inline{DATE};
+\item
+  Neither of the \inline{NUMBER}s have a scale or precision;
+\item
+  The last bind, \inline{BIND\#2}, is a \inline{NUMBER} and is \inline{NULL} (\inline{avl=00}) and so has no value clause;
+\item
+  Because these binds are of specific types, where the storage is always exactly as indicated by the \inline{mxl} field, the private storage used for the value is always the same length. In other words, \inline{NUMBER} data types are always 22 bytes while \inline{DATE}s are 7;
+\item
+  There are no character sets applicable to \inline{NUMBER} or \inline{DATE} data types (\inline{csi=00}).
+\end{itemize}
+
+Character (VARCHAR2, CHAR etc) binds take the following form:
+
+\begin{lstlisting}[numbers=none,caption={Bind Example - VARCHAR2 with WE8ISO8859P1 Characterset}]
+Bind#1
+ oacdty=01 mxl=32(04) mxlc=00 mal=00 scl=00 pre=00
+ oacflg=10 fl2=0001 frm=01 csi=31 siz=0 off=24
+ kxsbbbfp=610cd550 bln=32 avl=04 flg=01
+ value="DUAL"
+\end{lstlisting}
+
+Here we can see that:
+
+\begin{itemize}
+\item
+  \inline{csi=31} is listed so checking with the character set list, in the appendices of this document, we see that this means that the bind is using the \inline{WE8ISO8859P1} character set;
+\item
+  The \inline{value} can be easily read form the trace file. Had this been in a different character set, \inline{ALUTF16} for example (\inline{csi=2000}), then the value would most likely have been dumped in hexadecimal, as follows:
+
+\begin{lstlisting}[numbers=none,caption={Bind Example - VARCHAR2 with ALUTF16 Characterset}]
+...
+value = 0 44 0 55 0 41 0 4C
+\end{lstlisting}
+\item
+  We can also see that although the maximum size of the buffer for this bind is 32, (\inline{mxl=32}), only 4 bytes are in use
+  (\inline{mxl=32(04)}).
+\end{itemize}
+
+A \inline{REF\_CURSOR} bind, will resemble the following. It has an \inline{oacdty} of 102, which appears to confuse the \inline{value} field a little, as it implies that it cannot handle a data type of 102. Hmmm.
+
+\begin{lstlisting}[numbers=none,caption={Bind Example - REF\_CURSOR}]
+Bind#3
+ oacdty=102 mxl=04(04) mxlc=00 mal=00 scl=00 pre=00
+ oacflg=01 fl2=1000000 frm=00 csi=00 siz=0 off=176
+ kxsbbbfp=c2a91548 bln=04 avl=04 flg=01
+ value=Unhandled datatype (102) found in kxsbndinf
+ Dump of memory from 0x00000000C2A91548 to 0x00000000C2A9154C
+ 0C2A91540 00000000 [....]
+\end{lstlisting}
+
+\section{UNMAP}\label{unmap}\traceline{UNMAP}
+
+Not often seen any more. It was used when a disc based sort, currently running, was interrupted by the user typing CTRL-C.
+
+\inline{UNMAP} trace lines, if you ever see one, are identical to those of \inline{PARSE}, \inline{EXEC} and \inline{FETCH} as described above. They are, apparently, related to cleaning up the sort segments whose details can be seen in \inline{V\$SORT\_USAGE}. I have not seen an \inline{UNMAP} line in any trace file for many years, although I do remember trying to figure them out back in my 8i (or possibly 9i) days!
+

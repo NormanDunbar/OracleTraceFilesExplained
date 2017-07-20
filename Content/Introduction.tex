@@ -1,0 +1,11 @@
+\chapter{Introduction}\label{introduction}
+
+Oracle trace files are not greatly documented. This document is an attempt to do so. It is \emph{not} official in any way and is based on a good few years of reading these files to help diagnose various database problems.
+
+A trace file is really the best way to delve into what Oracle is doing, or to discover why something is taking so long - it shows you exactly what happened during the period that the session was being traced.
+
+Even better, when you extract an Explain Plan from a trace file, it is showing you exactly how Oracle retrieved the data from the tables, and exactly where the time was spend in doing so. Running an \inline{Explain Plan for ...} statement in \program{SQL*Plus}, \program{Toad} etc tells you what Oracle \emph{might} do. The two are not always the same.
+
+The trace files used and abused in this eBook were all self contained, and extracted from a dedicated session on the database. If you are using shared sessions, then you have the unfortunate problem of having bits of your session trace spread over any number of different trace files. Not fun.
+
+From Oracle 10g onwards, a utility has been supplied, named \emph{trcsess}\program{Trcsess}. This allows you to collect together all the separate files and merge them into one, ready for analysis. Even better, it apparently can also merge Oracle 9i shared server session trace files. Bonus!
