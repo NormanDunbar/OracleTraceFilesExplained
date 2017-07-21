@@ -194,962 +194,134 @@ command will - obviously - show what command is being parsed. However\ldots{}
 The following (large) table outlines the various command codes and was extracted
 from an Oracle 12.1.0.2 database.
 
-\begin{longtable}[]{@{}rl|rl|rl@{}}
-\hline
+\begin{longtable}[]{@{}rl|rl@{}}
+\toprule
+Code & Character Set & Code & Character Set  \\
+\midrule
+\endhead
+\bottomrule
 \caption{Oracle Command Codes\ldots{}\textit{continues on next page}}
 \endfoot
 \caption{Oracle Command Codes}
 \endlastfoot
 
-\toprule
-\begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
-Code\strut
-\end{minipage} & \begin{minipage}[b]{0.19\columnwidth}\raggedright\strut
-Command\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
-Code\strut
-\end{minipage} & \begin{minipage}[b]{0.24\columnwidth}\raggedright\strut
-Command\strut
-\end{minipage} & \begin{minipage}[b]{0.06\columnwidth}\raggedright\strut
-Code\strut
-\end{minipage} & \begin{minipage}[b]{0.24\columnwidth}\raggedright\strut
-Command\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-0\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-UNKNOWN\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-53\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP USER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-111\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PUBLIC SYNONYM\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-54\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP ROLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-112\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PUBLIC DATABASE LINK\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-INSERT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-55\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SET ROLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-113\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PUBLIC DATABASE LINK\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-3\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-SELECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-56\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE SCHEMA\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-114\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-GRANT ROLE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-4\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE CLUSTER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-57\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE CONTROL FILE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-115\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-REVOKE ROLE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-5\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER CLUSTER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-59\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE TRIGGER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-116\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-EXECUTE PROCEDURE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-6\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-UPDATE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-60\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER TRIGGER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-117\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-USER COMMENT\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-7\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DELETE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-61\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP TRIGGER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-118\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ENABLE TRIGGER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-8\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP CLUSTER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-62\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ANALYZE TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-119\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DISABLE TRIGGER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-9\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-63\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ANALYZE INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-120\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ENABLE ALL TRIGGERS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-10\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-64\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ANALYZE CLUSTER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-121\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DISABLE ALL TRIGGERS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-11\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-65\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PROFILE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-122\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-NETWORK ERROR\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-12\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-66\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PROFILE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-123\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-EXECUTE TYPE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-13\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE SEQUENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-67\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PROFILE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-128\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-FLASHBACK\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-14\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER SEQUENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-68\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PROCEDURE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-129\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE SESSION\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-15\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-70\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER RESOURCE COST\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-130\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER MINING MODEL\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-16\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP SEQUENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-71\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE MATERIALIZED VIEW LOG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-131\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SELECT MINING MODEL\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-17\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-GRANT OBJECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-72\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER MATERIALIZED VIEW LOG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-133\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE MINING MODEL\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-18\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-REVOKE OBJECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-73\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP MATERIALIZED VIEW LOG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-134\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PUBLIC SYNONYM\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-19\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE SYNONYM\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-74\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE MATERIALIZED VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-135\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DIRECTORY EXECUTE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-20\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP SYNONYM\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-75\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER MATERIALIZED VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-136\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SQL*LOADER DIRECT PATH LOAD\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-21\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-76\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP MATERIALIZED VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-137\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DATAPUMP DIRECT PATH UNLOAD\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-22\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-77\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE TYPE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-138\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DATABASE STARTUP\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-23\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-VALIDATE INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-78\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP TYPE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-139\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DATABASE SHUTDOWN\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-24\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE PROCEDURE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-79\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER ROLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-140\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE SQL TXLN PROFILE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-25\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER PROCEDURE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-80\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER TYPE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-141\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER SQL TXLN PROFILE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-26\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-LOCK\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-81\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE TYPE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-142\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-USE SQL TXLN PROFILE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-27\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-NO-OP\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-82\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER TYPE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-143\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP SQL TXLN PROFILE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-28\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-RENAME\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-83\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP TYPE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-144\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE MEASURE FOLDER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-29\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-COMMENT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-84\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP LIBRARY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-145\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER MEASURE FOLDER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-30\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-AUDIT OBJECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-85\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-TRUNCATE TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-146\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP MEASURE FOLDER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-31\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-NOAUDIT OBJECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-86\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-TRUNCATE CLUSTER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-147\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE CUBE BUILD PROCESS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-32\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE DATABASE LINK\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-88\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER VIEW\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-148\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER CUBE BUILD PROCESS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-33\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP DATABASE LINK\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-91\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE FUNCTION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-149\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP CUBE BUILD PROCESS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-34\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE DATABASE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-92\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER FUNCTION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-150\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE CUBE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-35\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER DATABASE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-93\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP FUNCTION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-151\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER CUBE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-36\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE ROLLBACK SEG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-94\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PACKAGE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-152\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP CUBE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-37\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER ROLLBACK SEG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-95\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PACKAGE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-153\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE CUBE DIMENSION\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-38\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP ROLLBACK SEG\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-96\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PACKAGE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-154\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER CUBE DIMENSION\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-39\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE TABLESPACE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-97\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PACKAGE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-155\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP CUBE DIMENSION\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-40\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER TABLESPACE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-98\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PACKAGE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-157\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE DIRECTORY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-41\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP TABLESPACE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-99\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PACKAGE BODY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-158\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP DIRECTORY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-42\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER SESSION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-100\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-LOGON\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-159\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE LIBRARY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-43\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER USER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-101\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-LOGOFF\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-160\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE JAVA\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-44\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-COMMIT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-102\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-LOGOFF BY CLEANUP\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-161\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER JAVA\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-45\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ROLLBACK\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-103\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SESSION REC\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-162\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP JAVA\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-46\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-SAVEPOINT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-104\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SYSTEM AUDIT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-163\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE OPERATOR\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-47\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-PL/SQL EXECUTE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-105\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SYSTEM NOAUDIT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-164\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE INDEXTYPE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-48\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-SET TRANSACTION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-106\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-AUDIT DEFAULT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-165\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP INDEXTYPE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-49\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER SYSTEM\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-107\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-NOAUDIT DEFAULT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-166\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER INDEXTYPE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-50\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-EXPLAIN\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-108\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SYSTEM GRANT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-167\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP OPERATOR\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-51\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE USER\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-109\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-SYSTEM REVOKE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-168\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ASSOCIATE STATISTICS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-52\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE ROLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-110\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PUBLIC SYNONYM\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-169\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DISASSOCIATE STATISTICS\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-170\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CALL METHOD\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-199\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-PURGE TABLESPACE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-218\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE FLASHBACK ARCHIVE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-171\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE SUMMARY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-200\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-PURGE TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-219\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER FLASHBACK ARCHIVE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-172\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER SUMMARY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-201\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-PURGE INDEX\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-220\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP FLASHBACK ARCHIVE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-173\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP SUMMARY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-202\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-UNDROP OBJECT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-225\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER DATABASE LINK\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-174\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE DIMENSION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-204\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-FLASHBACK DATABASE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-226\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE PLUGGABLE DATABASE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-175\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER DIMENSION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-205\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-FLASHBACK TABLE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-227\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PLUGGABLE DATABASE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-176\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP DIMENSION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-206\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE RESTORE POINT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-228\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP PLUGGABLE DATABASE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-177\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE CONTEXT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-207\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP RESTORE POINT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-229\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE AUDIT POLICY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-178\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP CONTEXT\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-208\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-PROXY AUTHENTICATION ONLY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-230\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER AUDIT POLICY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-179\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER OUTLINE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-209\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DECLARE REWRITE EQUIVALENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-231\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP AUDIT POLICY\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-180\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-CREATE OUTLINE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-210\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER REWRITE EQUIVALENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-232\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CODE-BASED GRANT\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-181\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-DROP OUTLINE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-211\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP REWRITE EQUIVALENCE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-233\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CODE-BASED REVOKE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-182\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-UPDATE INDEXES\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-212\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE EDITION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-238\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ADMINISTER KEY MANAGEMENT\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-183\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER OPERATOR\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-213\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER EDITION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-239\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE MATERIALIZED ZONEMAP\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-190\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-PASSWORD CHANGE\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-214\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP EDITION\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-240\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER MATERIALIZED ZONEMAP\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-192\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-ALTER SYNONYM\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-215\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP ASSEMBLY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-241\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-DROP MATERIALIZED ZONEMAP\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-197\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-PURGE USER\_RECYCLEBIN\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-216\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-CREATE ASSEMBLY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
----\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-Lots Missing Here!\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-198\strut
-\end{minipage} & \begin{minipage}[t]{0.19\columnwidth}\raggedright\strut
-PURGE DBA\_RECYCLEBIN\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-217\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER ASSEMBLY\strut
-\end{minipage} & \begin{minipage}[t]{0.06\columnwidth}\raggedright\strut
-305\strut
-\end{minipage} & \begin{minipage}[t]{0.24\columnwidth}\raggedright\strut
-ALTER PUBLIC DATABASE LINK\strut
-\end{minipage}\tabularnewline
+0    & UNKNOWN                      & 111 & DROP PUBLIC SYNONYM          \\
+1    & CREATE TABLE                 & 112 & CREATE PUBLIC DATABASE LINK  \\
+2    & INSERT                       & 113 & DROP PUBLIC DATABASE LINK    \\
+3    & SELECT                       & 114 & GRANT ROLE                   \\
+4    & CREATE CLUSTER               & 115 & REVOKE ROLE                  \\      
+5    & ALTER CLUSTER                & 116 & EXECUTE PROCEDURE            \\
+6    & UPDATE                       & 117 & USER COMMENT                 \\
+7    & DELETE                       & 118 & ENABLE TRIGGER               \\
+8    & DROP CLUSTER                 & 119 & DISABLE TRIGGER              \\
+9    & CREATE INDEX                 & 120 & ENABLE ALL TRIGGERS          \\
+10   & DROP INDEX                   & 121 & DISABLE ALL TRIGGERS         \\
+11   & ALTER INDEX                  & 122 & NETWORK ERROR                \\
+12   & DROP TABLE                   & 123 & EXECUTE TYPE                 \\
+13   & CREATE SEQUENCE              & 128 & FLASHBACK                    \\
+14   & ALTER SEQUENCE               & 129 & CREATE SESSION               \\
+15   & ALTER TABLE                  & 130 & ALTER MINING MODEL           \\
+16   & DROP SEQUENCE                & 131 & SELECT MINING MODEL          \\
+17   & GRANT OBJECT                 & 133 & CREATE MINING MODEL          \\
+18   & REVOKE OBJECT                & 134 & ALTER PUBLIC SYNONYM         \\
+19   & CREATE SYNONYM               & 135 & DIRECTORY EXECUTE            \\
+20   & DROP SYNONYM                 & 136 & SQL*LOADER DIRECT PATH LOAD  \\
+21   & CREATE VIEW                  & 137 & DATAPUMP DIRECT PATH UNLOAD  \\
+22   & DROP VIEW                    & 138 & DATABASE STARTUP             \\
+23   & VALIDATE INDEX               & 139 & DATABASE SHUTDOWN            \\
+24   & CREATE PROCEDURE             & 140 & CREATE SQL TXLN PROFILE      \\
+25   & ALTER PROCEDURE              & 141 & ALTER SQL TXLN PROFILE       \\
+26   & LOCK                         & 142 & USE SQL TXLN PROFILE         \\
+27   & NO-OP                        & 143 & DROP SQL TXLN PROFILE        \\
+28   & RENAME                       & 144 & CREATE MEASURE FOLDER        \\
+29   & COMMENT                      & 145 & ALTER MEASURE FOLDER         \\
+30   & AUDIT OBJECT                 & 146 & DROP MEASURE FOLDER          \\
+31   & NOAUDIT OBJECT               & 147 & CREATE CUBE BUILD PROCESS    \\
+32   & CREATE DATABASE LINK         & 148 & ALTER CUBE BUILD PROCESS     \\
+33   & DROP DATABASE LINK           & 149 & DROP CUBE BUILD PROCESS      \\
+34   & CREATE DATABASE              & 150 & CREATE CUBE                  \\
+35   & ALTER DATABASE               & 151 & ALTER CUBE                   \\
+36   & CREATE ROLLBACK SEG          & 152 & DROP CUBE                    \\  
+37   & ALTER ROLLBACK SEG           & 153 & CREATE CUBE DIMENSION        \\
+38   & DROP ROLLBACK SEG            & 154 & ALTER CUBE DIMENSION         \\
+39   & CREATE TABLESPACE            & 155 & DROP CUBE DIMENSION          \\
+40   & ALTER TABLESPACE             & 157 & CREATE DIRECTORY             \\
+41   & DROP TABLESPACE              & 158 & DROP DIRECTORY               \\
+42   & ALTER SESSION                & 159 & CREATE LIBRARY               \\
+43   & ALTER USER                   & 160 & CREATE JAVA                  \\
+44   & COMMIT                       & 161 & ALTER JAVA                   \\
+45   & ROLLBACK                     & 162 & DROP JAVA                    \\
+46   & SAVEPOINT                    & 163 & CREATE OPERATOR              \\
+47   & PL/SQL EXECUTE               & 164 & CREATE INDEXTYPE             \\
+48   & SET TRANSACTION              & 165 & DROP INDEXTYPE               \\
+49   & ALTER SYSTEM                 & 166 & ALTER INDEXTYPE              \\
+50   & EXPLAIN                      & 167 & DROP OPERATOR                \\
+51   & CREATE USER                  & 168 & ASSOCIATE STATISTICS         \\
+52   & CREATE ROLE                  & 169 & DISASSOCIATE STATISTICS      \\
+53   & DROP USER                    & 170 & CALL METHOD                  \\
+54   & DROP ROLE                    & 171 & CREATE SUMMARY               \\
+55   & SET ROLE                     & 172 & ALTER SUMMARY                \\
+56   & CREATE SCHEMA                & 173 & DROP SUMMARY                 \\
+57   & CREATE CONTROL FILE          & 174 & CREATE DIMENSION             \\
+59   & CREATE TRIGGER               & 175 & ALTER DIMENSION              \\
+60   & ALTER TRIGGER                & 176 & DROP DIMENSION               \\
+61   & DROP TRIGGER                 & 177 & CREATE CONTEXT               \\
+62   & ANALYZE TABLE                & 178 & DROP CONTEXT                 \\
+63   & ANALYZE INDEX                & 179 & ALTER OUTLINE                \\
+64   & ANALYZE CLUSTER              & 180 & CREATE OUTLINE               \\
+65   & CREATE PROFILE               & 181 & DROP OUTLINE                 \\
+66   & DROP PROFILE                 & 182 & UPDATE INDEXES               \\
+67   & ALTER PROFILE                & 183 & ALTER OPERATOR               \\
+68   & DROP PROCEDURE               & 190 & PASSWORD CHANGE              \\
+70   & ALTER RESOURCE COST          & 192 & ALTER SYNONYM                \\
+71   & CREATE MATERIALIZED VIEW LOG & 197 & PURGE USER\_RECYCLEBIN       \\
+72   & ALTER MATERIALIZED VIEW LOG  & 198 & PURGE DBA\_RECYCLEBIN        \\
+73   & DROP MATERIALIZED VIEW LOG   & 199 & PURGE TABLESPACE             \\
+74   & CREATE MATERIALIZED VIEW     & 200 & PURGE TABLE                  \\
+75   & ALTER MATERIALIZED VIEW      & 201 & PURGE INDEX                  \\
+76   & DROP MATERIALIZED VIEW       & 202 & UNDROP OBJECT                \\
+77   & CREATE TYPE                  & 204 & FLASHBACK DATABASE           \\
+78   & DROP TYPE                    & 205 & FLASHBACK TABLE              \\
+79   & ALTER ROLE                   & 206 & CREATE RESTORE POINT         \\
+80   & ALTER TYPE                   & 207 & DROP RESTORE POINT           \\
+81   & CREATE TYPE BODY             & 208 & PROXY AUTHENTICATION ONLY    \\
+82   & ALTER TYPE BODY              & 209 & DECLARE REWRITE EQUIVALENCE  \\
+83   & DROP TYPE BODY               & 210 & ALTER REWRITE EQUIVALENCE    \\
+84   & DROP LIBRARY                 & 211 & DROP REWRITE EQUIVALENCE     \\
+85   & TRUNCATE TABLE               & 212 & CREATE EDITION               \\
+86   & TRUNCATE CLUSTER             & 213 & ALTER EDITION                \\
+88   & ALTER VIEW                   & 214 & DROP EDITION                 \\
+91   & CREATE FUNCTION              & 215 & DROP ASSEMBLY                \\
+92   & ALTER FUNCTION               & 216 & CREATE ASSEMBLY              \\
+93   & DROP FUNCTION                & 217 & ALTER ASSEMBLY               \\
+94   & CREATE PACKAGE               & 218 & CREATE FLASHBACK ARCHIVE     \\
+95   & ALTER PACKAGE                & 219 & ALTER FLASHBACK ARCHIVE      \\
+96   & DROP PACKAGE                 & 220 & DROP FLASHBACK ARCHIVE       \\
+97   & CREATE PACKAGE BODY          & 225 & ALTER DATABASE LINK          \\
+98   & ALTER PACKAGE BODY           & 226 & CREATE PLUGGABLE DATABASE    \\
+99   & DROP PACKAGE BODY            & 227 & ALTER PLUGGABLE DATABASE     \\
+100  & LOGON                        & 228 & DROP PLUGGABLE DATABASE      \\
+101  & LOGOFF                       & 229 & CREATE AUDIT POLICY          \\
+102  & LOGOFF BY CLEANUP            & 230 & ALTER AUDIT POLICY           \\
+103  & SESSION REC                  & 231 & DROP AUDIT POLICY            \\
+104  & SYSTEM AUDIT                 & 232 & CODE-BASED GRANT             \\
+105  & SYSTEM NOAUDIT               & 233 & CODE-BASED REVOKE            \\
+106  & AUDIT DEFAULT                & 238 & ADMINISTER KEY MANAGEMENT    \\
+107  & NOAUDIT DEFAULT              & 239 & CREATE MATERIALIZED ZONEMAP  \\
+108  & SYSTEM GRANT                 & 240 & ALTER MATERIALIZED ZONEMAP   \\
+109  & SYSTEM REVOKE                & 241 & DROP MATERIALIZED ZONEMAP    \\
+110  & CREATE PUBLIC SYNONYM        & 305 & ALTER PUBLIC DATABASE LINK   \\
+
 \bottomrule
 \end{longtable}
 
 The exact list of commands for your particular database version can be
 extracted using the following SQL command:
 
-\begin{lstlisting}[language=SQL]
+\begin{lstlisting}[language=SQL,caption={SQL Query to List Oracle Command Codes}]
 select action as code,
        name as command
-from   audit_action;
+from   audit_actions;
 \end{lstlisting}
 
 There are 212 different commands in Oracle 12c (12.1.0.2) while Oracle
@@ -1158,69 +330,123 @@ There are 212 different commands in Oracle 12c (12.1.0.2) while Oracle
 %------------------------------------------------------------------------------
 \chapter{Oracle Characterset Codes}\label{oracle-characterset-codes}
 %------------------------------------------------------------------------------
-\index{Oracle Characterset Codes}
+\index{Oracle Character Set Codes}
 
 \section*{Bind Charactersets}\label{bind-charactersets}
 
-Some data types use different character sets. These are coded in the
-\inline{csi} field in the bind details lines of the trace file.
-Typical values that you may see here are as follows:
+Some data types use different character sets. These are coded in the \inline{csi} field in the bind details lines of the trace file. You can extract the list of current character set codes and names with the following query:
 
-\begin{longtable}[]{@{}r|l@{}}
+\begin{lstlisting}[language=SQL,caption={SQL Query to list Character Set Codes and Names}]
+select nls_charset_id(value), value 
+from   v$nls_valid_values
+where  isdeprecated='FALSE'
+and    parameter = 'CHARACTERSET'
+order  by nls_charset_id(value);
+\end{lstlisting}
+
+The values that you may see here are as follows, taken from an Oracle 12.1.0.1 database where there are 222 character sets listed:
+
+
+\begin{longtable}[]{@{}rl|rl|rl@{}}
 \toprule
-\begin{minipage}[b]{0.09\columnwidth}\raggedright\strut
-Code\strut
-\end{minipage} & \begin{minipage}[b]{0.21\columnwidth}\raggedright\strut
-Character Set\strut
-\end{minipage}\tabularnewline
+Code & Command & Code & Command & Code & Command \\
 \midrule
 \endhead
-\hline
-\caption{Bind Variable Character Sets}
+\bottomrule
+\caption{Oracle Character Set Codes\ldots{}\textit{continues on next page}}
 \endfoot
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-US7ASCII\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-31\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-WE8ISO8859P1\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-46\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-WE8ISO8859P15\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-170\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-WE8MSWIN1250\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-178\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-WE8MSWIN1252\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-871\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-UTF8\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-873\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-AL32UTF8\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-2000\strut
-\end{minipage} & \begin{minipage}[t]{0.21\columnwidth}\raggedright\strut
-AL16UTF16\strut
-\end{minipage}\tabularnewline
+\caption{Oracle Character Set Codes}
+\endlastfoot
+
+1   & US7ASCII       & 159 & CL8MACCYRILLICS   & 301  & EE8EBCDIC870C    \\
+2   & WE8DEC         & 160 & WE8PC860          & 312  & TR8EBCDIC1026S   \\
+3   & WE8HP          & 161 & IS8PC861          & 314  & BLT8EBCDIC1112S  \\
+4   & US8PC437       & 162 & EE8MACCES         & 315  & IW8EBCDIC424S    \\
+5   & WE8EBCDIC37    & 163 & EE8MACCROATIANS   & 316  & EE8EBCDIC870S    \\
+6   & WE8EBCDIC500   & 164 & TR8MACTURKISHS    & 317  & CL8EBCDIC1025S   \\
+7   & WE8EBCDIC1140  & 165 & IS8MACICELANDICS  & 319  & TH8TISEBCDICS    \\
+8   & WE8EBCDIC285   & 166 & EL8MACGREEKS      & 320  & AR8EBCDIC420S    \\
+9   & WE8EBCDIC1146  & 167 & IW8MACHEBREWS     & 322  & CL8EBCDIC1025C   \\
+10  & WE8PC850       & 170 & EE8MSWIN1250      & 323  & CL8EBCDIC1025R   \\
+11  & D7DEC          & 171 & CL8MSWIN1251      & 324  & EL8EBCDIC875R    \\
+12  & F7DEC          & 172 & ET8MSWIN923       & 325  & CL8EBCDIC1158    \\
+13  & S7DEC          & 173 & BG8MSWIN          & 326  & CL8EBCDIC1158R   \\
+14  & E7DEC          & 174 & EL8MSWIN1253      & 327  & EL8EBCDIC423R    \\
+15  & SF7ASCII       & 175 & IW8MSWIN1255      & 351  & WE8MACROMAN8     \\
+16  & NDK7DEC        & 176 & LT8MSWIN921       & 352  & WE8MACROMAN8S    \\
+17  & I7DEC          & 177 & TR8MSWIN1254      & 353  & TH8MACTHAI       \\
+18  & NL7DEC         & 178 & WE8MSWIN1252      & 354  & TH8MACTHAIS      \\
+19  & CH7DEC         & 179 & BLT8MSWIN1257     & 368  & HU8CWI2          \\
+20  & YUG7ASCII      & 180 & D8EBCDIC273       & 380  & EL8PC437S        \\
+21  & SF7DEC         & 181 & I8EBCDIC280       & 381  & EL8EBCDIC875     \\
+22  & TR7DEC         & 182 & DK8EBCDIC277      & 382  & EL8PC737         \\
+23  & IW7IS960       & 183 & S8EBCDIC278       & 383  & LT8PC772         \\
+25  & IN8ISCII       & 184 & EE8EBCDIC870      & 384  & LT8PC774         \\
+27  & WE8EBCDIC1148  & 185 & CL8EBCDIC1025     & 385  & EL8PC869         \\
+28  & WE8PC858       & 186 & F8EBCDIC297       & 386  & EL8PC851         \\
+31  & WE8ISO8859P1   & 187 & IW8EBCDIC1086     & 390  & CDN8PC863        \\
+32  & EE8ISO8859P2   & 188 & CL8EBCDIC1025X    & 401  & HU8ABMOD         \\
+33  & SE8ISO8859P3   & 189 & D8EBCDIC1141      & 500  & AR8ASMO8X        \\
+34  & NEE8ISO8859P4  & 190 & N8PC865           & 554  & AR8NAFITHA711    \\
+35  & CL8ISO8859P5   & 191 & BLT8CP921         & 555  & AR8SAKHR707      \\
+36  & AR8ISO8859P6   & 192 & LV8PC1117         & 556  & AR8MUSSAD768     \\
+37  & EL8ISO8859P7   & 193 & LV8PC8LR          & 557  & AR8ADOS710       \\
+38  & IW8ISO8859P8   & 194 & BLT8EBCDIC1112    & 558  & AR8ADOS720       \\
+39  & WE8ISO8859P9   & 195 & LV8RST104090      & 559  & AR8APTEC715      \\
+40  & NE8ISO8859P10  & 196 & CL8KOI8R          & 560  & AR8MSWIN1256     \\
+41  & TH8TISASCII    & 197 & BLT8PC775         & 561  & AR8NAFITHA721    \\
+42  & TH8TISEBCDIC   & 198 & DK8EBCDIC1142     & 563  & AR8SAKHR706      \\
+43  & BN8BSCII       & 199 & S8EBCDIC1143      & 565  & AR8ARABICMAC     \\
+44  & VN8VN3         & 200 & I8EBCDIC1144      & 566  & AR8ARABICMACS    \\
+45  & VN8MSWIN1258   & 201 & F7SIEMENS9780X    & 590  & LA8ISO6937       \\
+46  & WE8ISO8859P15  & 202 & E7SIEMENS9780X    & 829  & JA16VMS          \\
+47  & BLT8ISO8859P13 & 203 & S7SIEMENS9780X    & 830  & JA16EUC          \\
+48  & CEL8ISO8859P14 & 204 & DK7SIEMENS9780X   & 831  & JA16EUCYEN       \\
+49  & CL8ISOIR111    & 205 & N7SIEMENS9780X    & 832  & JA16SJIS         \\
+50  & WE8NEXTSTEP    & 206 & I7SIEMENS9780X    & 833  & JA16DBCS         \\
+51  & CL8KOI8U       & 207 & D7SIEMENS9780X    & 834  & JA16SJISYEN      \\
+52  & AZ8ISO8859P9E  & 208 & F8EBCDIC1147      & 835  & JA16EBCDIC930    \\
+70  & AR8EBCDICX     & 210 & WE8GCOS7          & 836  & JA16MACSJIS      \\
+81  & EL8DEC         & 211 & EL8GCOS7          & 837  & JA16EUCTILDE     \\
+82  & TR8DEC         & 221 & US8BS2000         & 838  & JA16SJISTILDE    \\
+90  & WE8EBCDIC37C   & 222 & D8BS2000          & 840  & KO16KSC5601      \\
+91  & WE8EBCDIC500C  & 223 & F8BS2000          & 842  & KO16DBCS         \\
+92  & IW8EBCDIC424   & 224 & E8BS2000          & 845  & KO16KSCCS        \\
+93  & TR8EBCDIC1026  & 225 & DK8BS2000         & 846  & KO16MSWIN949     \\
+94  & WE8EBCDIC871   & 226 & S8BS2000          & 850  & ZHS16CGB231280   \\
+95  & WE8EBCDIC284   & 230 & WE8BS2000E        & 851  & ZHS16MACCGB23128 \\
+96  & WE8EBCDIC1047  & 231 & WE8BS2000         & 852  & ZHS16GBK        \\
+97  & WE8EBCDIC1140C & 232 & EE8BS2000         & 853  & ZHS16DBCS       \\
+98  & WE8EBCDIC1145  & 233 & CE8BS2000         & 854  & ZHS32GB18030    \\
+99  & WE8EBCDIC1148C & 235 & CL8BS2000         & 860  & ZHT32EUC        \\
+100 & WE8EBCDIC1047E & 239 & WE8BS2000L5       & 861  & ZHT32SOPS       \\
+101 & WE8EBCDIC924   & 241 & WE8DG             & 862  & ZHT16DBT        \\
+110 & EEC8EUROASCI   & 251 & WE8NCR4970        & 863  & ZHT32TRIS       \\
+113 & EEC8EUROPA3    & 261 & WE8ROMAN8         & 864  & ZHT16DBCS       \\
+114 & LA8PASSPORT    & 262 & EE8MACCE          & 865  & ZHT16BIG5       \\
+140 & BG8PC437S      & 263 & EE8MACCROATIAN    & 866  & ZHT16CCDC       \\
+150 & EE8PC852       & 264 & TR8MACTURKISH     & 867  & ZHT16MSWIN950   \\
+152 & RU8PC866       & 265 & IS8MACICELANDIC   & 868  & ZHT16HKSCS      \\
+153 & RU8BESTA       & 266 & EL8MACGREEK       & 871  & UTF8            \\
+154 & IW8PC1507      & 267 & IW8MACHEBREW      & 872  & UTFE            \\
+155 & RU8PC855       & 277 & US8ICL            & 873  & AL32UTF8        \\
+156 & TR8PC857       & 278 & WE8ICL            & 992  & ZHT16HKSCS31    \\
+158 & CL8MACCYRILLIC & 279 & WE8ISOICLUK       & 2000 & AL16UTF16       \\
+
 \bottomrule
 \end{longtable}
 
+If you see a character set code in the \inline{csi} field, and you don't have the above list, you can determine the characterset in use with the following query:
+
+\begin{lstlisting}[language=SQL,caption={SQL Query to Convert a \inline{csi} Code to a Charcter Set Name}]
+SELECT NLS_CHARSET_NAME(1) FROM dual;
+\end{lstlisting}
+
+Correspondingly, you can go from a charcter set name to its \inline{csi} code with the following query:
+
+\begin{lstlisting}[language=SQL,caption={SQL Query to Convert a Charcter Set Name  to a \inline{csi} Code}]
+SELECT NLS_CHARSET_ID('US7ASCII') FROM dual;
+\end{lstlisting}
 
 %------------------------------------------------------------------------------
 \chapter{How this Book Evolved}
@@ -1300,6 +526,19 @@ which some trace analysing utilities cannot cope with due to the
 additional fields that I have introduced. The Trace File Browser, in
 Toad\program{Toad}, on the other hand, copes with my trace files quite happily and
 simply ignores the additional data as appropriate.
+
+The example below shows the before and after state of a \inline{PARSE} line from a trace file:
+
+
+\begin{lstlisting}[numbers=none,caption={TraceAdjust Example - Before Processing}]
+PARSE #4474286416:c=0,e=418,p=0,cr=0,cu=0,mis=1,r=0,dep=1,og=4,plh=0,tim=1030574627220
+\end{lstlisting}
+
+Which becomes:
+
+\begin{lstlisting}[numbers=none,caption={TraceAdjust Example - After Processing}]
+PARSE #4474286416:c=0,e=418,p=0,cr=0,cu=0,mis=1,r=0,dep=1,og=4,plh=0,tim=1030574.627220,delta=-1,dslt=768371,local='2017 Mar 13 09:23:21.768371'
+\end{lstlisting}
 
 %------------------------------------------------------------------------------
 \chapter{TraceMiner2 Utility}

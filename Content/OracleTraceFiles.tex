@@ -10,8 +10,8 @@ The header is the top of the file and consists of a few lines of text giving det
 
 The following is an example of a trace file created on a Windows server, running Oracle 11.2.0.4. Server, database and other potentially sensitive information has been obfuscated to protect the guilty, me!
 
-\begin{lstlisting}[numbers=none,caption={Trace File Header}]
-Trace file C:\ORACLEDATABASE\diag\rdbms\cfg\cfg\trace\cfg_ora_27680_FREESPACE.trc
+\begin{lstlisting}[numbers=none,caption={Oracle 11g Trace File Header}]
+Trace file C:\ORACLEDATABASE\diag\rdbms\cfg\cfg\trace\orcl_ora_27680_FREESPACE.trc
 Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
 Windows NT Version V6.2  
 CPU                 : 8 - type 8664, 8 Physical Cores
@@ -35,9 +35,50 @@ Windows thread id: 27680, image: ORACLE.EXE (SHAD)
 
 The last line, consisting of equals signs, is the separator between the header and the following trace details.
 
+In Oracle versions before 10g, the latter chunk of text is not found, the one detailing session, client, module etc, those first appeared at 10g.
+
+
+\begin{note}
+Sometimes, you might see a header that has a number of detail lines before the final separator, for example:
+
+\begin{lstlisting}[numbers=none,caption={Oracle 11g Trace File Header - With Waits etc}]
+...
+
+*** 2017-05-08 12:39:13.496
+*** SESSION ID:(777.2309) 2017-05-08 12:39:13.496
+*** CLIENT ID:() 2017-05-08 12:39:13.496
+*** SERVICE NAME:(SYS$USERS) 2017-05-08 12:39:13.496
+*** MODULE NAME:(SQL*Plus) 2017-05-08 12:39:13.496
+*** ACTION NAME:() 2017-05-08 12:39:13.496
+ 
+WAIT #523653448: nam='SQL*Net message to client' ela= 1 driver id=1111838976 #bytes=1 p3=0 obj#=14232 tim=1743670562625
+WAIT #523653448: nam='SQL*Net message from client' ela= 1027 driver id=1111838976 #bytes=1 p3=0 obj#=14232 tim=1743670564245
+CLOSE #523653448:c=0,e=7,dep=0,type=1,tim=1743670564280
+WAIT #0: nam='SQL*Net more data from client' ela= 12 driver id=1111838976 #bytes=10 p3=0 obj#=14232 tim=1743670564312
+=====================
+\end{lstlisting}
+
+In this case, the trace was started after the session had parsed a query, and was in the process of executing it (\inline{EXEC} and, if necessary \inline{FETCH}) when the trace started. Oracle has not shown the \inline{PARSING IN CURSOR} line(s) for the query in question, which is a shame.
+
+Normally, you can ignore the detail lines above the header separator, however, you sometimes see numerous \inline{WAIT} lines above the separator, in which case, there could be something to investigate. This is more likely top occur when you start tracing a session that is taking a huge amount of time, and is already under way when you begin the trace.
+\end{note}
+
+
+
+\subsection{Trace Details}\label{trace-details}
+
+The majority of the trace file consists of the full trace details for the session that was traced. There are numerous lines of text here, each different, each with their own fields of one kind or another.
+
+These are explained in the following sections.
+
+\begin{note}
+Remember, when Oracle writes a line to the trace file, it is done at the \emph{end} of the process that was indicated by the written line. For example, if you see a \inline{FETCH} line in the trace file, that was written at the time (\inline{tim}) that the \inline{FETCH} completed. The trace file should be considered a list of things \emph{that happened} and not \emph{things that are about to happen}.
+\end{note}
+
+
 \subsubsection{Timestamp Lines}\label{timestamp-lines}\index{Timestamps}
 
-One line that you should be interested in is this one from the above:
+One line that you should be interested in is this one from the header above:
 
 \begin{lstlisting}[numbers=none,caption={Time Stamp Line}]
 *** 2017-06-27 13:56:36.872
@@ -47,16 +88,7 @@ This is the first timestamp line in the trace file and sets the baseline for all
 
 There are usually a few timestamp lines written to the trace file, depending on how long it has been processing for, and these mean that we can, with a bit of fiddling, relate a \inline{tim} value to an actual time on the clock.
 
-\subsection{Trace Details}\label{trace-details}
-
-The majority of the trace file consists of the full trace details for the session that was traced. There are numerous lines of text here, each different, each with their own fields of one kind or another.
-
-These are explained in the following sections.
-
-\begin{note}
-Remember, when Oracle writes a line to the trace file, it is done at the \emph{end} of the process that was indicated by the written line. For example, if you see a \inline{FETCH} line in the trace file, that was written at the tim (\inline{tim}) that the \inline{FETCH} completed. The trace file should be considered a list of things \emph{that happened} and not \emph{things that are about to happen}.
-\end{note}
-
+The \emph{first} \inline{tim} value that you see, following a timestamp line, will be the microsecond equivalent to the date and time in the timestamp line.
 
 \subsubsection{Recursive SQL}\label{recursive-sql}\index{SQL!Recursive}\index{Recursive SQL}
 
@@ -72,17 +104,11 @@ This recursion leads to a foible in the trace file, your statement appears last 
 
 For example, in a trace file I have open in front of me, the first statement with a \inline{dep=0} occurs at line 709 in the file. Everything prior to that runs at \inline{dep=3}, \inline{dep=2} or \inline{dep=1} and complete before I can see my own SQL statement. 
 
-Under normal circumstances, a statement that is parsed (executed etc) at \inline{dep=n} has been called recursively, to facilitate a statement, that will follow in the trace file, that is itself parsed (executed etc) at \inline{dep=n-1}.
+Under normal circumstances, a statement that is parsed (executed etc) at \inline{dep=$n$}, where $n > 0$, has been called recursively, to facilitate a statement, that will follow in the trace file, that is itself parsed (executed etc) at \inline{dep=$n-1$}.
 
 \subsubsection{Waits}\label{waits}\index{Waits}
 
-\inline{WAIT} lines in a trace file are similar, in that the
-\inline{WAIT} must complete, and so is written to the trace file
-\emph{before} the statement that incurred the wait. For example, a
-\inline{FETCH} that had to wait for
-\inline{db file scattered read} events, will appear later in the
-trace file that the individual \inline{WAIT} lines that the
-\inline{FETCH} suffered from.
+\inline{WAIT} lines in a trace file are similar, in that the \inline{WAIT} must complete, and so is written to the trace file, \emph{before} the statement that incurred the wait. For example, a \inline{FETCH} that had to wait for \inline{db file scattered read} events, will appear later in the trace file that the individual \inline{WAIT} lines that the \inline{FETCH} suffered from.
 
 \subsubsection{Cursor Ids}\label{cursor-ids}\index{Cursor IDs}
 
@@ -95,6 +121,8 @@ In Oracle 11g, the cursor \emph{appears} to be an address in memory\footnote{But
 You might want to look in the \inline{STATUS} column in \inline{V\$SESSION} to determine if the session is active - doing \emph{something} - or not. However, you must be aware that the \inline{STATUS} column only gives an active reading when the statement is in a \inline{PARSE}, \inline{EXEC} or \inline{FETCH} phase of execution. If the statement is in a \inline{WAIT}, for example, it will show as inactive - but it is actually still processing the current statement. Something to bear in mind.
 
 \section{Trace File Details}\label{trace-file-details}
+
+As mentioned above, the trace file details, which consists of many different entries, is discussed in the following chapter.
 
 \chapter{Trace File Entries}
 
@@ -161,8 +189,7 @@ Unknown.\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Time, in microseconds, for this statement to be parsed. This is not the
-time it took!\strut
+Time, in microseconds, that the details were written out to the trace file.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 hv\strut
@@ -192,7 +219,7 @@ The \inline{sqlid} field is the same as the \inline{SQL\_ID} column in \inline{V
 
 Sometime Oracle will not write these lines to the trace file. If the cursor has been parsed, and subsequently coded, then re-parsed, you will see a \inline{PARSE} line but not a new \inline{PARSING IN CURSOR} for the statement. This \emph{appears} to be only on those occasions where the statement is re-parsed \emph{immediately} after being closed. I have not seen this ``feature'' when the cursor ID was used by a different statement in between.
 
-\section{PARSE}\label{parse}\traceline{PARSE}
+\newpage\section{PARSE}\label{parse}\traceline{PARSE}
 
 Normally, after the \inline{PARSING IN CURSOR} lines, you will see a \inline{PARSE} line for the same cursor ID. This is not always the case, for example, if you started the trace after the statement had been parsed, Oracle will write the \inline{PARSING IN CURSOR} lines, but not the \inline{PARSE}, to the trace file.
 
@@ -291,6 +318,12 @@ Time, in microseconds, when the parse for the statement completed.
 
 The \inline{plh} value is a value that corresponds to the column \inline{PLAN\_HASH\_VALUE} in \inline{V\$SQL\_PLAN}, \inline{V\$SQL\_PLAN\_STATISTICS\_ALL} and \inline{V\$SQLSTATS}. (There may be other views where this value appears, depending on the Oracle version in use.)
 
+\subsection*{Block Details}\label{block-details}
+
+\index{Block Details!Physical blocks}
+\index{Block Details!Current blocks}
+\index{Block Details!Consistent blocks}
+
 The \inline{p}, \inline{cr} and \inline{cu} statistics are the usual ones for block reads, viz:
 
 \begin{itemize}
@@ -307,7 +340,7 @@ The fields for an \inline{PARSE} are the same as those for an \inline{EXEC} and 
 
 The \inline{r} field is \emph{interesting}. Surely only a \inline{FETCH} would process some rows? I thought so too, and in all the trace files I've come across, I have yet to see (ok, yet to \emph{notice}) a \inline{PARSE} line with anything other than \inline{r=0}. I wonder why Oracle have it as part of the \inline{PARSE}? Maybe, because they use the same format of line for the \inline{PARSE} and \inline{EXEC} they decided just to use the same one, and set the row count for a \inline{PARSE} to zero?\footnote{We may never know!}
 
-\subsection{PARSE ERROR}\label{parse-error}\traceline{PARSE ERROR}
+\newpage\section{PARSE ERROR}\label{parse-error}\traceline{PARSE ERROR}
 
 If a \inline{PARSE} goes wrong for some reason, the trace file will show something like the following:
 
@@ -382,7 +415,7 @@ In this case, there was an error \inline{ORA-01031: insufficient privileges} as 
 
 The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
 
-\section{EXEC}\label{exec}\traceline{EXEC}
+\newpage\section{EXEC}\label{exec}\traceline{EXEC}
 
 The \inline{EXEC} phase of a statement's execution is when Oracle dives into the database to build a result set of the desired data. It need not be the complete result set though, so beware of that.
 
@@ -495,9 +528,9 @@ end;
 
 The ``do\_something()'' call is to \inline{DBMS\_MONITOR.START\_TRACE}, \inline{DBMS\_MONITOR.STOP\_TRACE} and calls to \inline{DBMS\_OUTPUT.GET\_LINE}. These statements have no \inline{FETCH} calls.
 
-You may wish to refer back to the details on the \inline{PARSE} line, above, for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
+You may wish to refer back to page \pageref{block-details} for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
 
-\section{FETCH}\label{fetch}\traceline{FETCH}
+\newpage\section{FETCH}\label{fetch}\traceline{FETCH}
 
 After processing the \inline{EXEC} call, and any associated \inline{WAIT}s, Oracle may \inline{FETCH} some, or all, of the rows returned by the query. A \inline{FETCH} line may resemble the following:
 
@@ -595,9 +628,9 @@ The fields for a \inline{FETCH} are also the same as those for a \inline{PARSE} 
 
 The \inline{mis} field is \emph{interesting}. Surely only a \inline{PARSE} would indicate a miss in the cache? Again, I think Oracle are using the same format of a trace line for \inline{PARSE}, \inline{EXEC} and \inline{FETCH} and simply ignoring or defaulting certain, non-applicable, fields.
 
-You may wish to refer back to the details on the \inline{PARSE} line, above, for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
+You may wish to refer back to page \pageref{block-details} for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
 
-\section{WAIT}\label{wait}\traceline{WAIT}
+\newpage\section{WAIT}\label{wait}\traceline{WAIT}
 
 This is the meat of the trace file, usually. Under normal circumstances, it's usual for the various phases of execution (\inline{PARSE}, \inline{EXEC} and \inline{FETCH}) to encounter some \inline{WAIT} events. And I would say, personally\footnote{Beware of   small sample sizes!}, that these \inline{WAIT} states are where the vast majority of the total response time is encountered.
 
@@ -751,7 +784,7 @@ The \inline{obj\#} refers to a specific object, where one is involved. In the ab
 
 Where an \inline{obj\#} is not -1, then the value refers to the \inline{OBJECT\_ID} in the \inline{DBA\_OBJECTS} view.
 
-\section{ERROR}\label{error}\traceline{ERROR}
+\newpage\section{ERROR}\label{error}\traceline{ERROR}
 
 If an error is detected while tracing a session, the trace file may show something like the following:
 
@@ -795,7 +828,7 @@ Time, in microseconds, when this error was detected.\strut
 
 In this example, the error relates to \inline{ORA-31013: Invalid XPATH expression} and indeed, is what the user saw on their terminal at the time - and was the reason I traced it because the application wasn't good enough in explaining which object caused the problem!
 
-\section{STAT}\label{stat}\traceline{STAT}
+\newpage\section{STAT}\label{stat}\traceline{STAT}
 
 In order to see the \inline{STAT} lines in your trace file, the \inline{TIMED\_STATISTICS} parameter for the database must be set to \inline{TRUE}.
 
@@ -931,7 +964,7 @@ The number of rows processed. 11g onwards.\strut
 \bottomrule
 \end{longtable}
 
-\section{CLOSE}\label{close}\traceline{CLOSE}
+\newpage\section{CLOSE}\label{close}\traceline{CLOSE}
 
 An example of a \inline{CLOSE} line from a trace file is as follows:
 
@@ -1017,7 +1050,7 @@ The \inline{type} field is used to determine how the cursor was closed. It takes
 
 A cursor ID that has been closed may be re-used by a subsequent opening of a new cursor, which can be for a different statement, or for this one again. 
 
-\section{XCTEND}\label{xctend}\traceline{XCTEND}
+\newpage\section{XCTEND}\label{xctend}\traceline{XCTEND}
 
 This line in a trace file indicates the end of a transaction. Sometimes you will see this:
 
@@ -1072,7 +1105,7 @@ Time, in microseconds, at which the transaction ended.\strut
 \bottomrule
 \end{longtable}
 
-\section{BINDS}\label{binds}\traceline{BINDS}
+\newpage\section{BINDS}\label{binds}\traceline{BINDS}
 
 To see the bind details in a trace file, you need to have enabled at least trace level 4 (for a 10046 event), or set \inline{binds => true} for \inline{DBMS\_SUPPORT} and \inline{DBMS\_MONITOR} calls to start tracing. You should also be \emph{using} binds in your SQL statement too of course!
 
@@ -1378,7 +1411,7 @@ Bind#3
  0C2A91540 00000000 [....]
 \end{lstlisting}
 
-\section{UNMAP}\label{unmap}\traceline{UNMAP}
+\newpage\section{UNMAP}\label{unmap}\traceline{UNMAP}
 
 Not often seen any more. It was used when a disc based sort, currently running, was interrupted by the user typing CTRL-C.
 
