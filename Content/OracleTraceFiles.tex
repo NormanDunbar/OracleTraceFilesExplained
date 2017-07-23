@@ -60,7 +60,7 @@ WAIT #0: nam='SQL*Net more data from client' ela= 12 driver id=1111838976 #bytes
 
 In this case, the trace was started after the session had parsed a query, and was in the process of executing it (\inline{EXEC} and, if necessary \inline{FETCH}) when the trace started. Oracle has not shown the \inline{PARSING IN CURSOR} line(s) for the query in question, which is a shame.
 
-Normally, you can ignore the detail lines above the header separator, however, you sometimes see numerous \inline{WAIT} lines above the separator, in which case, there could be something to investigate. This is more likely top occur when you start tracing a session that is taking a huge amount of time, and is already under way when you begin the trace.
+Normally, you can ignore the detail lines above the header separator, however, you sometimes see numerous \inline{WAIT} lines above the separator, in which case, there could be something to investigate. This is more likely to occur when you start tracing a session that is taking a huge amount of time, and is already under way when you begin the trace.
 \end{note}
 
 
@@ -329,7 +329,7 @@ The \inline{p}, \inline{cr} and \inline{cu} statistics are the usual ones for bl
 \begin{itemize}
 \tightlist
 \item
-  Physical reads occur when Oracle must read a block, from disc, into   the buffer cache. This indicates also an additional \inline{cr} as   the block will be used unchanged.
+  Physical reads occur when Oracle must read a block, from disc, into   the buffer cache. This indicates also an additional \inline{cu} as the block will be used unchanged.
 \item
   Consistent reads are the number of blocks of UNDO that Oracle applied   to one or more blocks, in order to return the data in those blocks, to   the state they were in when the ``query'' started. The query in this   case, would be any or all recursive queries necessary to facilitate   the \inline{PARSE}.
 \item
@@ -689,7 +689,7 @@ Event parameter 3.\strut
 \bottomrule
 \end{longtable}
 
-The \inline{p1}, \inline{p2} and \inline{p3} parameters are different depending on the wait event name. You may require to loom them up in \inline{V\$EVENT\_NAME} to understand what they refer to. For the event above, we see the following:
+The \inline{p1}, \inline{p2} and \inline{p3} parameters are different depending on the wait event name. You may require to look them up in \inline{V\$EVENT\_NAME} to understand what they refer to. For the event above, we see the following:
 
 \begin{itemize}
 \tightlist
@@ -834,7 +834,11 @@ In order to see the \inline{STAT} lines in your trace file, the \inline{TIMED\_S
 
 In Oracle 9i, there are no execution statistics or timings displayed in the \inline{op} field. These are only present from 10g onwards.
 
-The \inline{STAT} lines show you \emph{exactly} how Oracle went about getting the data back to you. It is possible for this to be different for the plan displayed by the \inline{EXPLAIN PLAN FOR ...} statement. In a trace file, it shows what happened, as opposed to what \emph{might} happen!
+The \inline{STAT} lines show you \emph{exactly} how Oracle went about getting the data back to you. This is because, what you are seeing is the actual \inline{EXECUTION PLAN} and it is possible for this to be different for the plan displayed by the \inline{EXPLAIN PLAN FOR ...} statement. 
+
+\begin{note}
+In a trace file, the execution plan shows what did happened, as opposed to the explain plan showing what was planned to happen, but may have changed as \emph{stuff} was encountered during the exection.
+\end{note}
 
 A typical \inline{STAT} output could resemble the following:
 
