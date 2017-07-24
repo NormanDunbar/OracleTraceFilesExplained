@@ -10,174 +10,106 @@
 The \inline{oacdty} parameter in a bind variables details determines
 the data type of that bind variable. This is not necessarily the data
 type of the column in a table that it may be being \inline{INSERT}ed
-or \inline{UPDATE}d into, or compared against.
+or \inline{UPDATE}d into, or compared against in a \inline{WHERE} clause.
 
-The following data are taken from the \emph{Internal Data Types} section
+There is a table of data types and codes in the \emph{Internal Data Types} section
 of the \emph{Data Types} chapter in the 12cR2 
 \href{http://docs.oracle.com/database/122/LNOCI/data-types.htm\#LNOCI16266}{\emph{Oracle Call
 Interface} manual}.
 
-Listed data types are:
+However, various other sources on the internet, and in books, seem to
+disagree with some of what the above table shows. In addition, I have
+come across many Oracle Trace files where a ROWID was code 11 and not
+code 69. Consistency? Who mentioned consistency?
+
+There is, however, a slightly less easy manner of getting the correct data type codes, straight from the horse's mouth. In Oracle 11g this is a view named \inline{DBA\_TAB\_COLS}, while in 12c, it has been renamed to \inline{DBA\_TAB\_COLS\_V\$}. Looking at the source of that view, we can see the following data type codes are in use:
 
 \begin{longtable}[]{@{}r|l@{}}
-\hline
+\toprule
+Code & Data Type  \\
+\midrule
+\endhead
+\bottomrule
 \caption{Bind Variable data Types\ldots{}\textit{continues on next page}}
 \endfoot
 \caption{Bind Variable data Types}
 \endlastfoot
 
-\toprule
-\begin{minipage}[b]{0.09\columnwidth}\raggedright\strut
-Code\strut
-\end{minipage} & \begin{minipage}[b]{0.43\columnwidth}\raggedright\strut
-Data Type\strut
-\end{minipage}\tabularnewline
-\midrule
-\endhead
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-1\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-VARCHAR2 or NVARCHAR2\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-2\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-NUMBER\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-8\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-LONG\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-11\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-ROWID\footnotemark{}\strut
-\end{minipage}
-\footnotetext{Code 11 is not officially listed by Oracle, but I have
-  seen it in a trace file of my own for a ROWID data type.}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-12\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-DATE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-23\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-RAW\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-24\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-LONG RAW\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-25\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-Unhandled data type\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-29\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-Unhandled data type\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-69\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-ROWID\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-96\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-CHAR or NCHAR\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-100\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-BINARY\_FLOAT\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-101\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-BINARY\_DOUBLE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-102\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-REF\_CURSOR\footnotemark{}\strut
-\end{minipage}
-\footnotetext{Code 102 is not officially listed by Oracle, but I've seen
-  REF CURSORs with this code in my own trace files.}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-108\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-User-defined type -object type, VARRAY, nested table)\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-111\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-REF\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-112\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-CLOB or NCLOB\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-113\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-BLOB\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-114\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-BFILE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-123\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-VARRAY\footnotemark{}\strut
-\end{minipage}
-\footnotetext{Code 123 is not officially listed by Oracle, but I have
-  seen it in a trace file of my own for a VARRAY data type.}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-180\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-TIMESTAMP\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-181\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-TIMESTAMP WITH TIME ZONE\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-182\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-INTERVAL YEAR TO MONTH\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-183\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-INTERVAL DAY TO SECOND\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-208\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-UROWID\strut
-\end{minipage}\tabularnewline
-\begin{minipage}[t]{0.09\columnwidth}\raggedright\strut
-231\strut
-\end{minipage} & \begin{minipage}[t]{0.43\columnwidth}\raggedright\strut
-TIMESTAMP WITH LOCAL TIME ZONE\strut
-\end{minipage}\tabularnewline
+1 & NVARCHAR2 or VARCHAR2 \\
+2 & NUMBER or FLOAT(precision) \\
+8 & LONG \\
+9 & NCHAR VARYING or VARCHAR \\
+12 & DATE \\
+23 & RAW \\
+24 & LONG RAW \\
+58 & ANYDATA or XMLTYPE \\
+69 & ROWID \\
+96 & NCHAR or CHAR \\
+100 & BINARY\_FLOAT \\
+101 & BINARY\_DOUBLE \\
+105 & MLSLABEL \\
+106 & MLSLABEL \\
+111 & REF XMLTYPE \\
+112 & NCLOB or CLOB \\
+113 & BLOB \\
+114 & BFILE \\
+115 & CFILE \\
+121 & User defined and/or object TYPEs \\
+122 & User defined and/or object TYPEs \\
+123 & User defined and/or object TYPEs \\
+178 & TIME(scale) \\
+179 & TIME(scale) WITH TIME ZONE \\
+180 & TIMESTAMP(scale) \\
+181 & TIMESTAMP(scale) WITH TIME ZONE \\
+182 & INTERVAL YEAR(precision) TO MONTH \\
+183 & INTERVAL DAY(precision) TO SECOND(scale) \\
+208 & UROWID (Universal ROWID)\\
+231 & TIMESTAMP(scale) WITH LOCAL TIME ZONE \\
+
 \bottomrule
 \end{longtable}
 
-However, various other sources on the internet, and in books, seem to
-disagree with some of what the above table shows. In addition, I have
-come across at least one Oracle Trace where a ROWID was code 11 and not
-code 69, also, I have seen VARRAY as code 123 and not as code 108.
-Consistency? Who mentioned consistency?
+\begin{note}
+Data types 178 and 179 are both listed in 11g and 12c, but you try creating a table with the \inline{TIME(n)} or \inline{TIME(n) WITH TIME ZONE} and see what happens! They \emph{appear} to be Java data types as that appears to be the only manual that lists them as valid data types.
+\end{note}
+
+Anything else, not mentioned above, is \emph{supposedly} an UNDEFINED and/or UNHANDLED data type, however, I have also seen the following in various trace files:
+
+\begin{longtable}[]{@{}r|l@{}}
+\toprule
+Code & Data Type  \\
+\midrule
+\endhead
+\bottomrule
+\caption{Unlisted Bind Data Types\ldots{}\textit{continues on next page}}
+\endfoot
+\caption{Unlisted Bind Data Types}
+\endlastfoot
+
+11 & ROWID \\
+102 & REF\_CURSOR \\
+108 & User defined TYPEs \\
+123 & VARRAY \\
+
+\bottomrule
+\end{longtable}
+
+For example, here is a \inline{ROWID} with \inline{oacdty=11} as opposed to \inline{oacdty=69}. The following example was taken from a trace file, created on Windows with Oracle 11.2.0.4:
+
+\begin{lstlisting}[numbers=none,caption={Bind Example - \inline{ROWID} With \inline{oacdty=11}}]
+PARSING IN CURSOR #5141169152 len=37 dep=1 uid=0 oct=3 lid=0 tim=3520788504344 hv=1398610540 ad='7ffc0a95d898' sqlid='grwydz59pu6mc'
+select text from view$ where rowid=:1
+END OF STMT
+PARSE #5141169152:c=0,e=14640,p=0,cr=29,cu=0,mis=1,r=0,dep=1,og=4,plh=0,tim=3520788504343
+BINDS #5141169152:
+ Bind#0
+  oacdty=11 mxl=16(16) mxlc=00 mal=00 scl=00 pre=00
+  oacflg=18 fl2=0001 frm=00 csi=00 siz=16 off=0
+  kxsbbbfp=bff30890  bln=16  avl=16  flg=05
+  value=00002787.000A.0001
+\end{lstlisting}  
+  
+There's an example of a \inline{REF\_CURSOR} bind on page \pageref{ref-cursor-102} of this eBook showing the use of an \inline{oacdty=102}.
 
 %------------------------------------------------------------------------------
 \chapter{Oracle Command Codes}\label{oracle-command-codes}

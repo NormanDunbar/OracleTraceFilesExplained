@@ -837,7 +837,7 @@ In Oracle 9i, there are no execution statistics or timings displayed in the \inl
 The \inline{STAT} lines show you \emph{exactly} how Oracle went about getting the data back to you. This is because, what you are seeing is the actual \inline{EXECUTION PLAN} and it is possible for this to be different for the plan displayed by the \inline{EXPLAIN PLAN FOR ...} statement. 
 
 \begin{note}
-In a trace file, the execution plan shows what did happened, as opposed to the explain plan showing what was planned to happen, but may have changed as \emph{stuff} was encountered during the exection.
+In a trace file, the execution plan shows what did happen, as opposed to the explain plan showing what was planned to happen, but may have changed as \emph{stuff} was encountered during the exection.
 \end{note}
 
 A typical \inline{STAT} output could resemble the following:
@@ -1403,7 +1403,7 @@ value = 0 44 0 55 0 41 0 4C
   (\inline{mxl=32(04)}).
 \end{itemize}
 
-A \inline{REF\_CURSOR} bind, will resemble the following. It has an \inline{oacdty} of 102, which appears to confuse the \inline{value} field a little, as it implies that it cannot handle a data type of 102. Hmmm.
+\label{ref-cursor-102}A \inline{REF\_CURSOR} bind, will resemble the following. It has an \inline{oacdty} of 102, which appears to confuse the \inline{value} field a little, as it implies that it cannot handle a data type of 102. Hmmm.
 
 \begin{lstlisting}[numbers=none,caption={Bind Example - REF\_CURSOR}]
 Bind#3
