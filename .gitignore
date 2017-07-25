@@ -1,3 +1,5 @@
+aux_files\*
+
 *.aux
 *.bcf
 *.idx

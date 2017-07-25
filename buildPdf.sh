@@ -14,8 +14,8 @@
 # Last Modified: 30th June 2017.
 #
 
-pdflatex OracleTraceFilesExplained.tex
-makeindex -s StyleInd.ist OracleTraceFilesExplained.idx
-pdflatex OracleTraceFilesExplained.tex
-pdflatex OracleTraceFilesExplained.tex
+pdflatex -aux-directory=aux_files OracleTraceFilesExplained.tex
+makeindex -s StyleInd.ist aux_files/OracleTraceFilesExplained.idx
+pdflatex -aux-directory=aux_files OracleTraceFilesExplained.tex
+pdflatex -aux-directory=aux_files OracleTraceFilesExplained.tex
 
