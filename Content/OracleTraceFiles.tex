@@ -184,7 +184,7 @@ Oracle Command Code of the SQL Statement. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 lid\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Unknown.\strut
+Unknown - perhaps the proxy login iID?\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
@@ -211,17 +211,17 @@ The SQL ID for the statement.\strut
 
 The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
 
-The \inline{lid} field is unknown at present. It's probably an ID of some kind, but for what?
+The \inline{lid} field is unknown at present. It's probably an ID of some kind, but for what? Perhaps it is something to do with proxy logins and \inline{lid} is the login identifier?
 
 As mentioned, the cursor ID field has a value that may (or may not) be an address in memory. However, that's not the same as the \inline{ad} field, which is (I think) an address in memory for the cursor.
 
 The \inline{sqlid} field is the same as the \inline{SQL\_ID} column in \inline{V\$SQL}. The \inline{hv} field is the hash value that Oracle used to determine if this statement was to be found in the cache or not. It matches the \inline{SQL\_HASH\_VALUE} (and \inline{PREV\_HASH\_VALUE}) column in \inline{V\$SESSION} and also the \inline{HASH\_VALUE} column in \inline{V\$SQL}.
 
-Sometime Oracle will not write these lines to the trace file. If the cursor has been parsed, and subsequently coded, then re-parsed, you will see a \inline{PARSE} line but not a new \inline{PARSING IN CURSOR} for the statement. This \emph{appears} to be only on those occasions where the statement is re-parsed \emph{immediately} after being closed. I have not seen this ``feature'' when the cursor ID was used by a different statement in between.
+Sometime Oracle will not write these lines to the trace file. If the cursor has been parsed, and subsequently closed, then re-parsed, you will see a \inline{PARSE} line but not a new \inline{PARSING IN CURSOR} for the statement. This \emph{appears} to be only on those occasions where the statement is re-parsed \emph{immediately} after being closed. I have not seen this ``feature'' when the cursor ID was used by a different statement in between.
 
 \newpage\section{PARSE}\label{parse}\traceline{PARSE}
 
-Normally, after the \inline{PARSING IN CURSOR} lines, you will see a \inline{PARSE} line for the same cursor ID. This is not always the case, for example, if you started the trace after the statement had been parsed, Oracle will write the \inline{PARSING IN CURSOR} lines, but not the \inline{PARSE}, to the trace file.
+Normally, after the \inline{PARSING IN CURSOR} lines, you will see a \inline{PARSE} line for the same cursor ID. This is not always the case, for example, if you started the trace after the statement had been parsed, Oracle *may* write the \inline{PARSING IN CURSOR} lines, but not the \inline{PARSE}, to the trace file.
 
 A typical \inline{PARSE} line will look like this:
 
@@ -396,7 +396,7 @@ Oracle Command Code of the SQL Statement. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 lid\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Unknown.\strut
+Unknown - perhaps Login ID for proxy logins?\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
@@ -915,7 +915,7 @@ In 10g and above, the additional fields in the \inline{op} field itself, are as 
 
 \begin{longtable}[]{@{}l|l@{}}
 \hline
-\caption{Stat - Fields for Oracl;e 10g Onwards\ldots{}\textit{continues on next page}}
+\caption{Stat - Fields for Oracle 10g Onwards\ldots{}\textit{continues on next page}}
 \endfoot
 \caption{Stat - Fields for Oracle 10g Onwards}
 \endlastfoot
@@ -956,7 +956,7 @@ The cost of this step, as determined by the Cost Based Optimiser.\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 size\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Form 11g, an estimate of the size, in bytes, of the data returned by
+From 11g onwards, an estimate of the size, in bytes, of the data returned by
 this step.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
@@ -1320,7 +1320,7 @@ If a bind, for example \inline{:3}, is used more than once in the \emph{same} SQ
 
 The \inline{oacdty} values are listed in the appendices for reference. There are quite a few of these, and you should note that experience has shown that the Oracle documentation doesn't always seem match up to the reality of a trace file.
 
-Always be aware, however, that just because a bind is defined to be a VARCHAR2, \inline{oacdty=01}, for example, it doesn't mean that the column in the table it relates to is also a VARCHAR2. Some people write code that passed VARCHAR2 values to a DATE column - this negating the ability to ever use an index (unless a function based index is created) on that DATE column!
+Always be aware, however, that just because a bind is defined to be a VARCHAR2, \inline{oacdty=01}, for example, it doesn't mean that the column in the table it relates to is also a VARCHAR2. Some people write code that passes VARCHAR2 values to a DATE column - this negating the ability to ever use an index (unless a function based index is created) on that DATE column!
 
 The \inline{mxl} fields shows how big the buffer assigned to this bind variable is, and how much of it has been used. This is measured in bytes. The \inline{mxlc} shows, where applicable, the buffer size and used size in characters\footnote{At least, that's what \emph{I} think it   shows!}. This will depend on the character set in use. If the character size is not appropriate, then \inline{mxlc} will be zero.
 
@@ -1391,7 +1391,7 @@ Here we can see that:
 \item
   \inline{csi=31} is listed so checking with the character set list, in the appendices of this document, we see that this means that the bind is using the \inline{WE8ISO8859P1} character set;
 \item
-  The \inline{value} can be easily read form the trace file. Had this been in a different character set, \inline{ALUTF16} for example (\inline{csi=2000}), then the value would most likely have been dumped in hexadecimal, as follows:
+  The \inline{value} can be easily read from the trace file. Had this been in a different character set, \inline{ALUTF16} for example (\inline{csi=2000}), then the value would most likely have been dumped in hexadecimal, as follows:
 
 \begin{lstlisting}[numbers=none,caption={Bind Example - VARCHAR2 with ALUTF16 Characterset}]
 ...
