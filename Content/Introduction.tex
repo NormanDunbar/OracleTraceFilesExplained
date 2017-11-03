@@ -37,3 +37,91 @@ This eBook is a work in progress, I am always learning, or trying to. As I updat
 \section*{Comments}
 
 Seen anything blatantly wrong? Something  you think needs a better explanation? Too many blatant plugs? You can either create an issue on GitHub, or, \href{mailto://norman@dunbar-it.co.uk}{email me} with details and I'll do my best to get it fixed.
+
+\chapter{Trace File Gotchas!}\label{tracefilegotchas}
+
+Trace files can be full of pitfalls and traps for the unwary. Best take care!
+
+\section{Things to Beware Of}
+
+There are a few things to watch out for in trace files, some of these are mentioned frequently in the text below, but they are also gathered here together, in one place, for your convenience.\footnote{Ok, for \emph{my} convenience!}
+	
+\subsection{When Are Lines Written to the Trace File?}
+
+It cannot be said often enough, \emph{a line in the trace file is written when that particular action has completed} and not before. So, if you see a line defining a \inline{PARSE} statement in the trace file, the \inline{PARSE} has completed at that point. The \inline{tim} value gives you the (relative) time that the action completed. 
+
+\subsection{Tim Values}
+
+On 11g \inline{tim} values are in microseconds, or, millionths of a second, and are an offset from some epoch, which itself depends on the Operating System in use.
+
+You can get a rough idea of how long a statement took by subtracting the previous \inline{tim} from the current \inline{tim} - the answer is in microseconds, so count back 6 places from the right end of the \inline{tim} value, and shove in a decimal point.
+
+Alternatively, use my \program{TraceAdjust}\inline{TraceAdjust} utility to convert \inline{tim} values into date and times accurate to the microsecond. (Plug! See Appendix~\ref{traceadjust} on page~\pageref{traceadjust} for details.)
+
+\subsection{Cursor Depth}\index{Cursor Depth}
+
+Cursors are parsed, executed etc at a given depth. This can be seen in the \inline{dep=$n$} details in the appropriate lines in the trace file.
+
+If the listed depth is zero, then this is the top level SQL in the trace file, and usually corresponds to your own statements. Statements running in a PL/SQL procedure, function etc, however, \emph{may} be listed at a different depth with the call to the procedure (or whatever) being run at depth zero.
+
+As mentioned above, lines are written to the trace file when an action completes, so you will see (at least in most trace files) the \inline{PARSE}, \inline{EXEC} and \inline{FETCH} and possibly \inline{STAT} and/or \inline{CLOSE} for the recursive SQL statements \emph{after} the \inline{PARSE} but \emph{before} the \inline{EXEC} for your statement. Simply because of the need to execute all those recursive statements in order to facilitate the \inline{EXEC} of yours.
+
+If you see a statement being actioned at dep=$n$, where $n <> 0$, then it is being actioned recursively for another statement at dep=$n-1$ which \emph{follows later} in the trace file.
+
+\subsection{Cursor IDs Get Reused}\index{Cursor ID Reuse}
+
+When you see something like \inline{PARSE \#1234567890} then the digits after the \# are the cursor ID. In the old days, prior to Oracle 9i, cursor IDs were monotonically increasing and were never reused in the same trace file. Once cursor \#1 had been closed, you wouldn't see it again.
+
+This is no longer true and a cursor ID \emph{can} be reused once closed. There are two (known to me) variations:
+
+\subsubsection{Same SQL Statement Reused by Same CursorID}
+
+Some applications write SQL that is parsed far too frequently and may even be parsed each and every time it is executed by the application code. If this is the case, the trace files \emph{may} show the following steps
+
+\begin{itemize}
+	\item \inline{CLOSE} of the current cursor.
+	\item \inline{PARSE} for the new statement.
+	\item And so on.
+\end{itemize}
+
+If the same statement is reparsed and nothing else has been parsed since the \inline{CLOSE}, then it is possible that the expected \inline{PARSING IN CURSOR} line, showing the SQL text, may be missing from the trace file.
+
+\subsubsection{Different SQL using Same Cursor ID}
+
+If a statement's cursor is closed and another \emph{different} statement is parsed, it \emph{can} obtain the same Cursor ID as the recently closed cursor. In this case, you will see the following:
+
+\begin{itemize}
+	\item \inline{CLOSE} of the current cursor.
+	\item \inline{PARSING IN CURSOR} and the SQL text of the new statement.
+	\item \inline{PARSE} for the new statement.
+	\item And so on.
+\end{itemize}
+
+The moral to this tale is simple, you cannot be sure that all the \inline{EXEC}s for a given Cursor ID actually mean that the exact same SQL statement has been executed - you could be seeing lots of different SQL statements simply reusing the same Cursor ID.
+
+\subsection{What About Child Cursors?}\index{Child Cursors}
+
+Following on from the above, the same SQL statement \emph{can} (and does) have the ability to be executed under any number of \emph{different} Cursor IDs! How is this possible?
+
+If your statement uses bind variables, then given a recent version of Oracle, something called \emph{Bind Variable Peeking} may be in use to ensure that a statement has the most efficient plan of execution regardless of the bind variable values. In the good old days, whatever bind value got in first determined the execution plan for every other \inline{EXEC} of that statement, even if it made the execution plan completely hopeless for most values that followed.
+
+\emph{I think} - because I have not checked - that this means that certain statements and bind combinations will cause a number of separate child cursors, and thus, different Cursor IDs in the trace file, for the same statement. A recent trace file I examined had 15 different Cursor IDs for the same statement. 
+
+I knew they were all the same as the \inline{PARSING IN CURSOR} line has the \inline{sqlid} at the end, and although the Cursor IDs were different, the SQL Text and such like were all the same and so was the \inline{sqlid} so it \emph{had} to be the same SQL statement, just with numerous child cursors. Beware of this when looking in trace files!
+
+If you know the \inline{sqlid} then you can count and find any and all child cursors, and their IDs in the trace file with a swift grep command.
+
+The following command will count the number of child cursors in the trace file for the SQL statement with \inline{sqlid 0um91dczrf666}:
+
+\begin{lstlisting}[numbers=none,caption={Counting Child Cursors in a Trace File}]
+grep -i "0um91dczrf666" TraceFile.trc | wc -l
+\end{lstlisting}
+
+The following command will extract, in the order of appearance in the trace file, all the child cursors for the same statement as above:
+
+\begin{lstlisting}[numbers=none,caption={Extracting Child Cursors from a Trace File}]
+grep -i "0um91dczrf666" TraceFile.trc | cut -c 20-39
+\end{lstlisting}
+
+This was an HP-UX trace file, so the digits after the \# in the Cursor ID were from position 20 to 39 in the output from \inline{grep}. Other Operating Systems may differ, so test on yours first, just in case.
+
