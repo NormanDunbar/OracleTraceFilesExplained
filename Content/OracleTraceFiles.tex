@@ -72,8 +72,33 @@ The majority of the trace file consists of the full trace details for the sessio
 These are explained in the following sections.
 
 \begin{note}
-Remember, when Oracle writes a line to the trace file, it is done at the \emph{end} of the process that was indicated by the written line. For example, if you see a \inline{FETCH} line in the trace file, that was written at the time (\inline{tim}) that the \inline{FETCH} completed. The trace file should be considered a list of things \emph{that happened} and not \emph{things that are about to happen}.
+Remember, when Oracle writes a line to the trace file, it is done at the \emph{end} of the process that was indicated by the written line. For example, if you see a \inline{FETCH} line in the trace file, that was written at the time (\inline{tim}) that the \inline{FETCH} completed. The trace file should be considered a list of things \emph{that have happened} and not \emph{things that are about to happen}.
 \end{note}
+
+For example, a recent trace file that I had the pleasure of examining had over 2 million lines. The problem was to determine where a statement was losing over 2,000 seconds of time on its first \inline{EXEC} which it did not have on any of the subsequent \inline{EXEC}s.
+
+The statement was parsed at \inline{dep=0} on line 36,656 but was not executed, again at \inline{dep=0} until line 284,530, as the following \texttt{grep} output shows:
+
+\begin{lstlisting}[numbers=none,caption={Oracle 11g Problem Trace - \texttt{grep} output}]
+
+grep -n "dep=0" tracefile.trc
+
+...
+
+36656:PARSE #11529215045668893824:c=0,e=1076,p=0,cr=0,cu=0,mis=1,r=0,dep=0,og=1,plh=0,tim=26375808573637
+
+284530:EXEC #11529215045668893824:c=83870000,e=2048188431,p=1233,cr=45536,cu=18,mis=1,r=1,dep=0,og=1,plh=0,tim=26377856794348
+
+...
+\end{lstlisting}
+
+From the above you can see that nothing took place between the \inline{PARSE} and the \inline{EXEC}, so any other SQL executed between those lines was done in order to facilitate the \inline{EXEC} at line 284,530. So that's where the time was lost, in recursive SQL statements, executed in order to carry out the required statement's \inline{EXEC}. 
+
+A quick investigation showed that Oracle was gathering dynamic stats against numerous dictionary tables in the SYS schema, so after a quick \texttt{DBMS\_STATS.GATHER\_SCHEMA\_STATS} and a \texttt{DBMS\_STATS.GATHER\_DICTIONARY\_STATS} the lost time was restored and the problem went away.
+
+We \emph{know} that the time was being lost in the \inline{EXEC} as the \inline{PARSE} of the statement had been written to the trace file at line 36,656 so at that point, the \inline{PARSE} had completed. The \inline{EXEC} did not complete until line 284,530, so everything between those lines was related to the \inline{EXEC} and nothing to do with the \inline{PARSE}.
+
+Also, the \emph{elapsed time} for the \inline{EXEC} shows that the execution of the statement took 2048.188431 seconds (\emph{e=2048188431}).
 
 
 \subsubsection{Timestamp Lines}\label{timestamp-lines}\index{Timestamps}
