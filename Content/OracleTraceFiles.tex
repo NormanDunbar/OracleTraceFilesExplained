@@ -209,7 +209,7 @@ Oracle Command Code of the SQL Statement. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 lid\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Unknown - perhaps the proxy login iID?\strut
+Unknown - perhaps the proxy login ID?\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
@@ -247,6 +247,10 @@ Sometime Oracle will not write these lines to the trace file. If the cursor has 
 \newpage\section{PARSE}\label{parse}\traceline{PARSE}
 
 Normally, after the \inline{PARSING IN CURSOR} lines, you will see a \inline{PARSE} line for the same cursor ID. This is not always the case, for example, if you started the trace after the statement had been parsed, Oracle *may* write the \inline{PARSING IN CURSOR} lines, but not the \inline{PARSE}, to the trace file.
+
+Other times when the \inline{PARSE} line will not be seen is when the cursor associated with the SQL statement was previously \inline{CLOSE}d but Oracle decided not to hard close the cursor but instead cached it for future use. Normally this happens if \inline{SESSION\_CACHED\_CURSORS} is non-zero and the SQL statement has already been \inline{PARSE}d at least three times.
+
+See the \inline{type} parameter for the \inline{CLOSE} trace line in Section~\ref{close} on Page~\pageref{close} for details of how and when a cursor \emph{might} be cached.
 
 A typical \inline{PARSE} line will look like this:
 
@@ -1057,26 +1061,28 @@ The \inline{type} field is used to determine how the cursor was closed. It takes
 \begin{itemize}
 \tightlist
 \item
-  0 if the cursor was hard closed. This indicates that the cursor was   not saved in the server side closed cursor cache for later reuse. This can be because:
+  0 if the cursor was hard closed. This indicates that the cursor was not saved in the server side closed cursor cache for later reuse. This can be because:
 
   \begin{itemize}
   \tightlist
   \item
     The statement is a DDL statement. DDL statements are never cached.
   \item
-    \inline{SESSION\_CACHED\_CURSORS} is set to zero, and no caching is permitted.
+    \inline{SESSION\_CACHED\_CURSORS} is set to zero so no caching is permitted.
   \item
-    The statement could be cached, but as it has not been executed often enough (three times minimum), then it has not yet been cached.
+    The statement \emph{could} be cached, but as it has not been executed often enough (three times minimum), then it has not yet been cached.
   \end{itemize}
 \item
   1 if the cursor has been cached, as opposed to properly closed, in an empty slot in the cache.
 \item
   2 if the cursor was cached, but caused another cursor to be aged out as there were no free slots.
 \item
-  3 if the cursor remains in the cache.
+  3 if the cursor was used from the cache, and on \inline{CLOSE}, remains cached.
 \end{itemize}
 
-A cursor ID that has been closed may be re-used by a subsequent opening of a new cursor, which can be for a different statement, or for this one again. 
+A cursor that was cached on \inline{CLOSE}ing may be reused for the same SQL statement at a later time during the session, in this case, there will not be a \inline{PARSE} for the statement prior to the next \inline{BINDS} or \inline{EXEC} for the statement as it was not closed after the previous usage. When Oracle came to \inline{PARSE} the SQL again, it was found to be in the cache, and thus, was still open from the previous usage.
+
+A cursor ID that has been hard \inline{CLOSE}d may be re-used by a subsequent opening of a new cursor, which can be for a different statement, or for this one again. 
 
 \newpage\section{XCTEND}\label{xctend}\traceline{XCTEND}
 

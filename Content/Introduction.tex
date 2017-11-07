@@ -58,6 +58,13 @@ You can get a rough idea of how long a statement took by subtracting the previou
 
 Alternatively, use my \program{TraceAdjust}\inline{TraceAdjust} utility to convert \inline{tim} values into date and times accurate to the microsecond. (Plug! See Appendix~\ref{traceadjust} on page~\pageref{traceadjust} for details.)
 
+\subsection{Timestamps}
+
+Not all actions in the trace file may be \emph{accurately} timed. This can lead to the various \inline{tim} values getting slightly out of step. To attempt to alleviate this, Oracle will write timestamp lines to the trace file. These are flagged by three asterisks (\inline{***}) followed by the date and time, accurate to microsecond level, possibly in the format \inline{yyyy-mm-dd hh24:mi:ss.u} but this \emph{might} depend on locality etc. The \inline{tim} value immediately following these timestamp lines are adjusted to match the timestamp that preceded it.
+
+You can see an example of a timestamp line in the header for the trace file. An example is in Section~\ref{the-header} on Page~\pageref{the-header}.
+
+
 \subsection{Cursor Depth}\index{Cursor Depth}
 
 Cursors are parsed, executed etc at a given depth. This can be seen in the \inline{dep=$n$} details in the appropriate lines in the trace file.
@@ -80,11 +87,13 @@ Some applications write SQL that is parsed far too frequently and may even be pa
 
 \begin{itemize}
 	\item \inline{CLOSE} of the current cursor.
-	\item \inline{PARSE} for the new statement.
+	\item \emph{Possibly} a \inline{PARSE} for the new statement. This will not be present if the previous \inline{CLOSE} resulted in the cursor being cached.
 	\item And so on.
 \end{itemize}
 
 If the same statement is reparsed and nothing else has been parsed since the \inline{CLOSE}, then it is possible that the expected \inline{PARSING IN CURSOR} line, showing the SQL text, may be missing from the trace file.
+
+If the same statement has been parsed three or more times already, Oracle may cache the cursor rather than hard \inline{CLOSE}ing it as this is a performance improvement if the SQL has to be \inline{PARSE}d and \inline{EXEC}uted again. In this case, there will be no \inline{PARSE} line in the trace file for the statement - simply because it was not actually \inline{PARSE}d, merely retrieved from the cache already \inline{PARSE}d.
 
 \subsubsection{Different SQL using Same Cursor ID}
 
