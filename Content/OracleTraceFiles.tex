@@ -236,7 +236,14 @@ The SQL ID for the statement.\strut
 
 The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
 
-The \inline{lid} field also references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}. However, this only has a value when when logged in via a proxy user. This is the \inline{USER\_ID} of the username in the square brackets when you login - \inline{connect norman[dunbar]...} both, as far as I can tell, the \inline{uid} and \inline{lid} values are the same, and both refer to the `dunbar' user, not the `norman' user.
+The \inline{lid} field also references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}. However, this only has a value when when logged in via a proxy user. This is the \inline{USER\_ID} of the username in the square brackets when you login - \inline{connect norman[dunbar]...} both, as far as I have seen, the \inline{uid} and \inline{lid} values are the same, and both refer to the `dunbar' user, not the `norman' user. Given the same example as above, but logged in as a proxy user, we see something like the following:
+
+\begin{lstlisting}[numbers=none,caption={Parsing In Cursor Line - Proxy User}]
+PARSING IN CURSOR #3220341128 len=3081 dep=0 uid=220 oct=3 lid=220 ...
+\end{lstlisting}
+
+Both the \inline{uid} and the \inline{lid} parameters are the same, 220, and this is the \inline{USER\_ID} for the 'dunbar' user, although I logged in as the 'norman' user - but that logs in as a proxy for the 'dunbar' user, as in \inline{connect norman[dunbar]...}. I have yet to see the \inline{uid} and \inline{lid} numbers differ when logged in as a proxy user - so far at least.
+
 
 As mentioned, the cursor ID field has a value that may (or may not) be an address in memory. However, that's not the same as the \inline{ad} field, which is (I think) an address in memory for the cursor.
 
@@ -358,11 +365,11 @@ The \inline{p}, \inline{cr} and \inline{cu} statistics are the usual ones for bl
 \begin{itemize}
 \tightlist
 \item
-  Physical reads occur when Oracle must read a block, from disc, into   the buffer cache. This indicates also an additional \inline{cu} as the block will be used unchanged.
+  Physical reads occur when Oracle must read a block, from disc, into the buffer cache.
 \item
-  Consistent reads are the number of blocks of UNDO that Oracle applied   to one or more blocks, in order to return the data in those blocks, to   the state they were in when the ``query'' started. The query in this   case, would be any or all recursive queries necessary to facilitate   the \inline{PARSE}.
+  Consistent reads are the number of blocks of UNDO that Oracle applied to one or more blocks, in order to return the data in those blocks, to the state they were in when the ``query'' started. The query in this case, would be any or all recursive queries necessary to facilitate the \inline{PARSE}.
 \item
-  Current Reads are blocks that Oracle used without needing to roll them   back to the start of the ``query''.
+  Current Reads are blocks that Oracle used without needing to roll them back to the start of the ``query''.
 \end{itemize}
 
 The fields for an \inline{PARSE} are the same as those for an \inline{EXEC} and a \inline{FETCH} - see below.
