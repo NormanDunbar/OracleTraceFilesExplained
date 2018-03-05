@@ -209,7 +209,7 @@ Oracle Command Code of the SQL Statement. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 lid\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Unknown - perhaps the proxy login ID?\strut
+The user id of the proxy user, that the session logged in via. Usually the same as the UID.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
@@ -236,7 +236,7 @@ The SQL ID for the statement.\strut
 
 The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
 
-The \inline{lid} field is unknown at present. It's probably an ID of some kind, but for what? Perhaps it is something to do with proxy logins and \inline{lid} is the login identifier?
+The \inline{lid} field also references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}. However, this only has a value when when logged in via a proxy user. This is the \inline{USER\_ID} of the username in the square brackets when you login - \inline{connect norman[dunbar]...} both, as far as I can tell, the \inline{uid} and \inline{lid} values are the same, and both refer to the `dunbar' user, not the `norman' user.
 
 As mentioned, the cursor ID field has a value that may (or may not) be an address in memory. However, that's not the same as the \inline{ad} field, which is (I think) an address in memory for the cursor.
 
