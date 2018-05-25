@@ -432,7 +432,7 @@ Oracle Command Code of the SQL Statement. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 lid\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Unknown - perhaps Login ID for proxy logins?\strut
+The user id of the proxy user, that the session logged in via. Usually the same as the UID. See Section~\ref{parsing-in-cursor} on page~\pageref{parsing-in-cursor} for more details about proxy logins.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 tim\strut
@@ -563,7 +563,7 @@ end;
 
 The ``do\_something()'' call is to \inline{DBMS\_MONITOR.START\_TRACE}, \inline{DBMS\_MONITOR.STOP\_TRACE} and calls to \inline{DBMS\_OUTPUT.GET\_LINE}. These statements have no \inline{FETCH} calls.
 
-You may wish to refer back to page \pageref{block-details} for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
+You may wish to refer back to page~\pageref{block-details} for details of the \inline{p}, \inline{cr} and \inline{cu} block statistics in the \inline{EXEC} line.
 
 \newpage\section{FETCH}\label{fetch}\traceline{FETCH}
 
@@ -1175,13 +1175,13 @@ Data type code. (See Appendices.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 mxl\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Maximum length of the bind variable value. (private maximum length in
+Maximum length of the bind variable value. (Private maximum length in
 parentheses.)\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 mal\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Array length.\strut
+Array length. Only for array binds.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 scl\strut
@@ -1279,7 +1279,7 @@ in parentheses.)\strut
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 mal\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
-Array length.\strut
+Array length. Only for array binds.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 scl\strut

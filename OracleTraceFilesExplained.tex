@@ -67,6 +67,9 @@
 %----------------------------------------------------------------------------------------
 %	TITLE PAGE
 %----------------------------------------------------------------------------------------
+\frontmatter			% Must be presnt if using an index and want to have correct indexing
+                        % especially if mainmatter is used.
+                        
 \input{titlePage.tex}
 
 %----------------------------------------------------------------------------------------
@@ -77,7 +80,7 @@
 ~\vfill
 \thispagestyle{empty}
 
-\noindent Copyright \copyright 2017 Norman Dunbar\\ % Copyright notice
+\noindent Copyright \copyright 2017,2018 Norman Dunbar\\ % Copyright notice
 
 \noindent \textsc{Published by MeMyselfEye Publishing ;-)}\\ % Publisher
 
@@ -112,9 +115,9 @@
 %----------------------------------------------------------------------------------------
 %Here come the contents of the book...
 %----------------------------------------------------------------------------------------
-
+\mainmatter
 \input{includeContents}
-
+\backmatter
 
 %----------------------------------------------------------------------------------------
 %	NDunbar: BIBLIOGRAPHY - NOT REQUIRED

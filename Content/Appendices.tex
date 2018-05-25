@@ -22,7 +22,7 @@ disagree with some of what the above table shows. In addition, I have
 come across many Oracle Trace files where a ROWID was code 11 and not
 code 69. Consistency? Who mentioned consistency?
 
-There is, however, a slightly less easy manner of getting the correct data type codes, straight from the horse's mouth. In Oracle 11g this is a view named \inline{DBA\_TAB\_COLS}, while in 12c, it has been renamed to \inline{DBA\_TAB\_COLS\_V\$}. Looking at the source of that view, we can see the following data type codes are in use:
+In 11g (possibly 10g) onwards, there is a new view named \inline{V\$SQL\_BIND\_CAPTURE} which lists various details about binds variables for SQL cursors. Two columns are of interest here, \inline{DATATYPE} and \inline{DATATYPE\_STRING} which we can use to convert a data type number into an actual data type name. In addition, we can look at the source code for the view named \inline{DBA\_TAB\_COLS}, or renamed to \inline{DBA\_TAB\_COLS\_V\$} in 12c. 
 
 \begin{longtable}[]{@{}r|l@{}}
 \toprule
@@ -35,28 +35,35 @@ Code & Data Type  \\
 \caption{Bind Variable data Types}
 \endlastfoot
 
-1 & NVARCHAR2 or VARCHAR2 \\
-2 & NUMBER or FLOAT(precision) \\
-8 & LONG \\
-9 & NCHAR VARYING or VARCHAR \\
-12 & DATE \\
-23 & RAW \\
-24 & LONG RAW \\
-58 & ANYDATA or XMLTYPE \\
-69 & ROWID \\
-96 & NCHAR or CHAR \\
+  0 & UNDEFINED \\
+  1 & NVARCHAR2 or VARCHAR2 \\
+  2 & NUMBER or FLOAT(precision) \\
+  8 & LONG \\
+  9 & NCHAR VARYING or VARCHAR \\
+ 11 & ROWID \\
+ 12 & DATE \\
+ 16 & DATE \\
+ 23 & RAW \\
+ 24 & LONG RAW \\
+ 25 & UB2 \\
+ 29 & B4 \\
+ 58 & ANYDATA, XMLTYPE or OPAQUE \\
+ 69 & ROWID \\
+ 96 & NCHAR or CHAR \\
 100 & BINARY\_FLOAT \\
 101 & BINARY\_DOUBLE \\
+102 & REF CURSOR \\
 105 & MLSLABEL \\
 106 & MLSLABEL \\
+108 & User defined Types \\
 111 & REF XMLTYPE \\
 112 & NCLOB or CLOB \\
 113 & BLOB \\
 114 & BFILE \\
 115 & CFILE \\
 121 & User defined and/or object TYPEs \\
-122 & User defined and/or object TYPEs \\
-123 & User defined and/or object TYPEs \\
+122 & User defined and/or object TYPEs, NESTED TABLE \\
+123 & User defined and/or object TYPEs, VARRAY \\
 178 & TIME(scale) \\
 179 & TIME(scale) WITH TIME ZONE \\
 180 & TIMESTAMP(scale) \\
@@ -69,32 +76,14 @@ Code & Data Type  \\
 \bottomrule
 \end{longtable}
 
+Data type codes in the above table have been extracted from the \href{http://docs.oracle.com/database/122/LNOCI/data-types.htm\#LNOCI16266}{\emph{Oracle Call
+Interface} manual}, numerous trace files and/or the views mentioned. There are, as noted, inconsistencies between the various sources which is why there are the occasional duplicate entry.Sadly, Oracle doesn't document some internal details as much as it should (or as much as \textit{I} think it should!).
+
 \begin{note}
 Data types 178 and 179 are both listed in 11g and 12c, but you try creating a table with the \inline{TIME(n)} or \inline{TIME(n) WITH TIME ZONE} and see what happens! They \emph{appear} to be Java data types as that appears to be the only manual that lists them as valid data types.
 \end{note}
 
-Anything else, not mentioned above, is \emph{supposedly} an UNDEFINED and/or UNHANDLED data type, however, I have also seen the following in various trace files:
-
-\begin{longtable}[]{@{}r|l@{}}
-\toprule
-Code & Data Type  \\
-\midrule
-\endhead
-\bottomrule
-\caption{Unlisted Bind Data Types\ldots{}\textit{continues on next page}}
-\endfoot
-\caption{Unlisted Bind Data Types}
-\endlastfoot
-
-11 & ROWID \\
-102 & REF\_CURSOR \\
-108 & User defined TYPEs \\
-123 & VARRAY \\
-
-\bottomrule
-\end{longtable}
-
-For example, here is a \inline{ROWID} with \inline{oacdty=11} as opposed to \inline{oacdty=69}. The following example was taken from a trace file, created on Windows with Oracle 11.2.0.4:
+For an example of inconsistencies, here is a \inline{ROWID} with \inline{oacdty=11} as opposed to \inline{oacdty=69}. The following example was taken from a trace file, created on Windows with Oracle 11.2.0.4:
 
 \begin{lstlisting}[numbers=none,caption={Bind Example - \inline{ROWID} With \inline{oacdty=11}}]
 PARSING IN CURSOR #5141169152 len=37 dep=1 uid=0 oct=3 lid=0 tim=3520788504344 hv=1398610540 ad='7ffc0a95d898' sqlid='grwydz59pu6mc'
@@ -109,7 +98,7 @@ BINDS #5141169152:
   value=00002787.000A.0001
 \end{lstlisting}  
   
-There's an example of a \inline{REF\_CURSOR} bind on page \pageref{ref-cursor-102} of this eBook showing the use of an \inline{oacdty=102}.
+There's also an example of a \inline{REF\_CURSOR} bind on page \pageref{ref-cursor-102} of this eBook showing the use of an \inline{oacdty=102}.
 
 %------------------------------------------------------------------------------
 \chapter{Oracle Command Codes}\label{oracle-command-codes}
