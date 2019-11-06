@@ -11,13 +11,13 @@ The header is the top of the file and consists of a few lines of text giving det
 The following is an example of a trace file created on a Windows server, running Oracle 11.2.0.4. Server, database and other potentially sensitive information has been obfuscated to protect the guilty, me!
 
 \begin{lstlisting}[numbers=none,caption={Oracle 11g Trace File Header}]
-Trace file C:\ORACLEDATABASE\diag\rdbms\cfg\cfg\trace\orcl_ora_27680_FREESPACE.trc
+Trace file C:\ORACLEDATABASE\diag\rdbms\orcl\ORCL\trace\ORCL_ora_27680_FREESPACE.trc
 Oracle Database 11g Enterprise Edition Release 11.2.0.4.0 - 64bit Production
 Windows NT Version V6.2  
 CPU                 : 8 - type 8664, 8 Physical Cores
 Process Affinity    : 0x0x0000000000000000
 Memory (Avail/Total): Ph:29917M/57343M, Ph+PgF:24634M/65535M 
-Instance name: orcl
+Instance name: ORCL
 Redo thread mounted by this instance: 1
 Oracle process number: 373
 Windows thread id: 27680, image: ORACLE.EXE (SHAD)
@@ -37,6 +37,44 @@ The last line, consisting of equals signs, is the separator between the header a
 
 In Oracle versions before 10g, the latter chunk of text is not found, the one detailing session, client, module etc, those first appeared at 10g.
 
+Oracle 12c introduced us to the concept of \emph{Pluggable Databases}, so obvioulsy, the trace file headers had to change. The following is an example of a 12.2.0.1 trace file header for a pluggable database.
+
+\begin{lstlisting}[numbers=none,caption={Oracle 12c Trace File Header}]
+Trace file /u01/app/oracle/diag/rdbms/trkpre_lhr38r/orcl12c/trace/ORCL12C_ora_17361_NORM2.trc
+Oracle Database 12c EE High Perf Release 12.2.0.1.0 - 64bit Production
+Build label:    RDBMS_12.2.0.1.0_LINUX.X64_170125
+ORACLE_HOME:    /u01/app/oracle/product/12.2.0.1/dbhome_1
+System name:    Linux
+Node name:      cloud_01
+Release:        4.1.12-124.24.5.el6uek.x86_64
+Version:        #2 SMP Wed Jan 30 13:24:08 PST 2019
+Machine:        x86_64
+Instance name: ORCL12C
+Redo thread mounted by this instance: 1
+Oracle process number: 321
+Unix process pid: 17361, image: oracle@cloud_01
+
+
+*** 2019-11-06T13:10:13.148529+00:00 (ORCLPDB(3))
+*** SESSION ID:(243.1049) 2019-11-06T13:10:13.148550+00:00
+*** CLIENT ID:() 2019-11-06T13:10:13.148557+00:00
+*** SERVICE NAME:(orclpdb) 2019-11-06T13:10:13.148564+00:00
+*** MODULE NAME:(TOAD 13.0.0.80) 2019-11-06T13:10:13.148571+00:00
+*** ACTION NAME:(34466160,226220256,969036752) 2019-11-06T13:10:13.148578+00:00
+*** CLIENT DRIVER:() 2019-11-06T13:10:13.148585+00:00
+*** CONTAINER ID:(3) 2019-11-06T13:10:13.148592+00:00
+=====================
+\end{lstlisting}
+
+Some points to note here are:
+
+\begin{itemize}
+	\item Timestamps are now in the ISO standard format and show the time zone offset from UTC/GMT as well as separating the date form the time with `T';
+	\item Timestamp lines now show the container name and container id - ``ORCLPDB(3)'' in the above example;
+	\item PLus a few other additional lines.
+\end{itemize}
+
+The above example is taken from a database running on Oracle Linux 7.
 
 \begin{note}
 Sometimes, you might see a header that has a number of detail lines before the final separator, for example:
@@ -105,9 +143,16 @@ Also, the \emph{elapsed time} for the \inline{EXEC} shows that the execution of 
 
 One line that you should be interested in is this one from the header above:
 
-\begin{lstlisting}[numbers=none,caption={Time Stamp Line}]
+\begin{lstlisting}[numbers=none,caption={11g Time Stamp Line}]
 *** 2017-06-27 13:56:36.872
 \end{lstlisting}
+
+or this line, from a 12c database trace file (not shown here):
+
+\begin{lstlisting}[numbers=none,caption={12c Time Stamp Line}]
+*** 2019-11-06T13:10:13.148529+00:00 (ORCLPDB(3))
+\end{lstlisting}
+
 
 This is the first timestamp line in the trace file and sets the baseline for all the \inline{tim} fields (these will be explained below) that follow, however, briefly, the \inline{tim} values are in microseconds (millionths of a second) from a specific ``epoch'' - which depends on the operating system - and there isn't a consistent, operating system independent, method of converting \inline{tim} values from a huge number of microseconds to an actual date and time that humans will understand.
 
@@ -996,6 +1041,11 @@ time\strut
 The elapsed time in microseconds.\strut
 \end{minipage}\tabularnewline
 \begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
+str\strut
+\end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
+How many times this line was started (executed). (Oracle 12c onwards)\strut
+\end{minipage}\tabularnewline
+\begin{minipage}[t]{0.14\columnwidth}\raggedright\strut
 cost\strut
 \end{minipage} & \begin{minipage}[t]{0.65\columnwidth}\raggedright\strut
 The cost of this step, as determined by the Cost Based Optimiser.\strut
@@ -1013,6 +1063,32 @@ The number of rows processed. 11g onwards.\strut
 \end{minipage}\tabularnewline
 \bottomrule
 \end{longtable}
+
+The 12c field \inline{str=n} reports on how many times that a particular line of the trace (execution plan) was executed. For example, the following \inline{STAT} lines (where I've dropped some of the text to better fit on the page):
+
+\begin{lstlisting}[numbers=none,caption={Example 12c STAT lines}]
+STAT #nnn id=1 cnt=5 pid=0 pos=1 obj=0 op='NESTED LOOPS  (... str=1 ... card=5)'
+STAT #nnn id=2 cnt=65 pid=1 pos=1 obj=0 op='VIEW  index$_join$_001 (... str=1 ... card=65)'
+STAT #nnn id=3 cnt=65 pid=2 pos=1 obj=0 op='HASH JOIN  (... str=1 ...)'
+STAT #nnn id=4 cnt=65 pid=3 pos=1 obj=... op='INDEX FAST FULL SCAN PRPT_USERS_PK (... str=1 ... card=65)'
+STAT #nnn id=5 cnt=65 pid=3 pos=2 obj=... op='INDEX FAST FULL SCAN PRPT_USERS_UK (... str=1 ... card=65)'
+STAT #nnn id=6 cnt=5 pid=1 pos=2 obj=... op='INDEX RANGE SCAN PRPT_RECIPIENTS_PK (... str=65 ... card=1)'\end{lstlisting}
+
+Tkprof gives the following plan:
+
+\begin{lstlisting}[numbers=none,caption={Example 12c tkprof output}]
+Row Source Operation
+---------------------------------------------------
+NESTED LOOPS  (... starts=1 ... card=5)
+  VIEW  index$_join$_001 (... starts=1 ... card=65)
+  HASH JOIN  (... starts=1)
+    INDEX FAST FULL SCAN PRPT_USERS_PK (... starts=1 ... card=65) ...
+    INDEX FAST FULL SCAN PRPT_USERS_UK (... starts=1 ... card=65) ...
+  INDEX RANGE SCAN PRPT_RECIPIENTS_PK (... starts=65 ... card=1) ...
+\end{lstlisting}
+
+The nested loop executed once (\inline{starts=1}) and used the 65 rows in the view to execute a range scan of the index named \inline{PRPT\_RECIPIENTS\_PK}, once for each row (\inline{starts=65}).
+
 
 \newpage\section{CLOSE}\label{close}\traceline{CLOSE}
 

@@ -12,17 +12,30 @@ the data type of that bind variable. This is not necessarily the data
 type of the column in a table that it may be being \inline{INSERT}ed
 or \inline{UPDATE}d into, or compared against in a \inline{WHERE} clause.
 
-There is a table of data types and codes in the \emph{Internal Data Types} section
-of the \emph{Data Types} chapter in the 12cR2 
-\href{http://docs.oracle.com/database/122/LNOCI/data-types.htm\#LNOCI16266}{\emph{Oracle Call
-Interface} manual}.
+There is a table of data types and codes in the \emph{Internal Data Types} section of the \emph{Data Types} chapter in the 12cR2 \href{http://docs.oracle.com/database/122/LNOCI/data-types.htm\#LNOCI16266}{\emph{Oracle Call Interface} manual}.
 
 However, various other sources on the internet, and in books, seem to
 disagree with some of what the above table shows. In addition, I have
 come across many Oracle Trace files where a ROWID was code 11 and not
 code 69. Consistency? Who mentioned consistency?
 
-In 11g (possibly 10g) onwards, there is a new view named \inline{V\$SQL\_BIND\_CAPTURE} which lists various details about binds variables for SQL cursors. Two columns are of interest here, \inline{DATATYPE} and \inline{DATATYPE\_STRING} which we can use to convert a data type number into an actual data type name. In addition, we can look at the source code for the view named \inline{DBA\_TAB\_COLS}, or renamed to \inline{DBA\_TAB\_COLS\_V\$} in 12c. 
+In 11g (possibly 10g) onwards, there is a new view named \inline{V\$SQL\_BIND\_CAPTURE} which lists various details about binds variables for SQL cursors. Two columns are of interest here, \inline{DATATYPE} and \inline{DATATYPE\_STRING} which we can use to convert a data type number into an actual data type name. In addition, we can look at the source code for the view named \inline{DBA\_TAB\_COLS}, or renamed to \inline{DBA\_TAB\_COLS\_V\$} in 12c.
+
+\begin{lstlisting}[numbers=none,caption={Extracting the source code for DBA\_TAB\_COLS\_V\$ in Oracle 12.2.0.2}]
+select text_vc
+from   dba_views
+where  view_name = 'DBA_TAB_COLS_V$';
+\end{lstlisting}  
+
+On older versions of Oracle, this should suffice:
+
+\begin{lstlisting}[numbers=none,caption={Extracting the source code for DBA\_TAB\_COLS in Oracle 11.2.0.4}]
+select text_vc
+from   dba_views
+where  view_name = 'DBA_TAB_COLS';
+\end{lstlisting}  
+
+You will only get the first 4000 characters, but this is enough to see the main DECODE statements which converts a data type to a data type name.
 
 \begin{longtable}[]{@{}r|l@{}}
 \toprule
@@ -113,7 +126,7 @@ statement. Why we should need this, I have no idea, as the SQL text for the
 command will - obviously - show what command is being parsed. However\ldots{}
 
 The following (large) table outlines the various command codes and was extracted
-from an Oracle 12.1.0.2 database.
+from an Oracle 12.2.0.1 database.
 
 \begin{longtable}[]{@{}rl|rl@{}}
 \toprule
@@ -126,112 +139,126 @@ Code & Command & Code & Command  \\
 \caption{Oracle Command Codes}
 \endlastfoot
 
-0    & UNKNOWN                      & 111 & DROP PUBLIC SYNONYM          \\
-1    & CREATE TABLE                 & 112 & CREATE PUBLIC DATABASE LINK  \\
-2    & INSERT                       & 113 & DROP PUBLIC DATABASE LINK    \\
-3    & SELECT                       & 114 & GRANT ROLE                   \\
-4    & CREATE CLUSTER               & 115 & REVOKE ROLE                  \\      
-5    & ALTER CLUSTER                & 116 & EXECUTE PROCEDURE            \\
-6    & UPDATE                       & 117 & USER COMMENT                 \\
-7    & DELETE                       & 118 & ENABLE TRIGGER               \\
-8    & DROP CLUSTER                 & 119 & DISABLE TRIGGER              \\
-9    & CREATE INDEX                 & 120 & ENABLE ALL TRIGGERS          \\
-10   & DROP INDEX                   & 121 & DISABLE ALL TRIGGERS         \\
-11   & ALTER INDEX                  & 122 & NETWORK ERROR                \\
-12   & DROP TABLE                   & 123 & EXECUTE TYPE                 \\
-13   & CREATE SEQUENCE              & 128 & FLASHBACK                    \\
-14   & ALTER SEQUENCE               & 129 & CREATE SESSION               \\
-15   & ALTER TABLE                  & 130 & ALTER MINING MODEL           \\
-16   & DROP SEQUENCE                & 131 & SELECT MINING MODEL          \\
-17   & GRANT OBJECT                 & 133 & CREATE MINING MODEL          \\
-18   & REVOKE OBJECT                & 134 & ALTER PUBLIC SYNONYM         \\
-19   & CREATE SYNONYM               & 135 & DIRECTORY EXECUTE            \\
-20   & DROP SYNONYM                 & 136 & SQL*LOADER DIRECT PATH LOAD  \\
-21   & CREATE VIEW                  & 137 & DATAPUMP DIRECT PATH UNLOAD  \\
-22   & DROP VIEW                    & 138 & DATABASE STARTUP             \\
-23   & VALIDATE INDEX               & 139 & DATABASE SHUTDOWN            \\
-24   & CREATE PROCEDURE             & 140 & CREATE SQL TXLN PROFILE      \\
-25   & ALTER PROCEDURE              & 141 & ALTER SQL TXLN PROFILE       \\
-26   & LOCK                         & 142 & USE SQL TXLN PROFILE         \\
-27   & NO-OP                        & 143 & DROP SQL TXLN PROFILE        \\
-28   & RENAME                       & 144 & CREATE MEASURE FOLDER        \\
-29   & COMMENT                      & 145 & ALTER MEASURE FOLDER         \\
-30   & AUDIT OBJECT                 & 146 & DROP MEASURE FOLDER          \\
-31   & NOAUDIT OBJECT               & 147 & CREATE CUBE BUILD PROCESS    \\
-32   & CREATE DATABASE LINK         & 148 & ALTER CUBE BUILD PROCESS     \\
-33   & DROP DATABASE LINK           & 149 & DROP CUBE BUILD PROCESS      \\
-34   & CREATE DATABASE              & 150 & CREATE CUBE                  \\
-35   & ALTER DATABASE               & 151 & ALTER CUBE                   \\
-36   & CREATE ROLLBACK SEG          & 152 & DROP CUBE                    \\  
-37   & ALTER ROLLBACK SEG           & 153 & CREATE CUBE DIMENSION        \\
-38   & DROP ROLLBACK SEG            & 154 & ALTER CUBE DIMENSION         \\
-39   & CREATE TABLESPACE            & 155 & DROP CUBE DIMENSION          \\
-40   & ALTER TABLESPACE             & 157 & CREATE DIRECTORY             \\
-41   & DROP TABLESPACE              & 158 & DROP DIRECTORY               \\
-42   & ALTER SESSION                & 159 & CREATE LIBRARY               \\
-43   & ALTER USER                   & 160 & CREATE JAVA                  \\
-44   & COMMIT                       & 161 & ALTER JAVA                   \\
-45   & ROLLBACK                     & 162 & DROP JAVA                    \\
-46   & SAVEPOINT                    & 163 & CREATE OPERATOR              \\
-47   & PL/SQL EXECUTE               & 164 & CREATE INDEXTYPE             \\
-48   & SET TRANSACTION              & 165 & DROP INDEXTYPE               \\
-49   & ALTER SYSTEM                 & 166 & ALTER INDEXTYPE              \\
-50   & EXPLAIN                      & 167 & DROP OPERATOR                \\
-51   & CREATE USER                  & 168 & ASSOCIATE STATISTICS         \\
-52   & CREATE ROLE                  & 169 & DISASSOCIATE STATISTICS      \\
-53   & DROP USER                    & 170 & CALL METHOD                  \\
-54   & DROP ROLE                    & 171 & CREATE SUMMARY               \\
-55   & SET ROLE                     & 172 & ALTER SUMMARY                \\
-56   & CREATE SCHEMA                & 173 & DROP SUMMARY                 \\
-57   & CREATE CONTROL FILE          & 174 & CREATE DIMENSION             \\
-59   & CREATE TRIGGER               & 175 & ALTER DIMENSION              \\
-60   & ALTER TRIGGER                & 176 & DROP DIMENSION               \\
-61   & DROP TRIGGER                 & 177 & CREATE CONTEXT               \\
-62   & ANALYZE TABLE                & 178 & DROP CONTEXT                 \\
-63   & ANALYZE INDEX                & 179 & ALTER OUTLINE                \\
-64   & ANALYZE CLUSTER              & 180 & CREATE OUTLINE               \\
-65   & CREATE PROFILE               & 181 & DROP OUTLINE                 \\
-66   & DROP PROFILE                 & 182 & UPDATE INDEXES               \\
-67   & ALTER PROFILE                & 183 & ALTER OPERATOR               \\
-68   & DROP PROCEDURE               & 190 & PASSWORD CHANGE              \\
-70   & ALTER RESOURCE COST          & 192 & ALTER SYNONYM                \\
-71   & CREATE MATERIALIZED VIEW LOG & 197 & PURGE USER\_RECYCLEBIN       \\
-72   & ALTER MATERIALIZED VIEW LOG  & 198 & PURGE DBA\_RECYCLEBIN        \\
-73   & DROP MATERIALIZED VIEW LOG   & 199 & PURGE TABLESPACE             \\
-74   & CREATE MATERIALIZED VIEW     & 200 & PURGE TABLE                  \\
-75   & ALTER MATERIALIZED VIEW      & 201 & PURGE INDEX                  \\
-76   & DROP MATERIALIZED VIEW       & 202 & UNDROP OBJECT                \\
-77   & CREATE TYPE                  & 204 & FLASHBACK DATABASE           \\
-78   & DROP TYPE                    & 205 & FLASHBACK TABLE              \\
-79   & ALTER ROLE                   & 206 & CREATE RESTORE POINT         \\
-80   & ALTER TYPE                   & 207 & DROP RESTORE POINT           \\
-81   & CREATE TYPE BODY             & 208 & PROXY AUTHENTICATION ONLY    \\
-82   & ALTER TYPE BODY              & 209 & DECLARE REWRITE EQUIVALENCE  \\
-83   & DROP TYPE BODY               & 210 & ALTER REWRITE EQUIVALENCE    \\
-84   & DROP LIBRARY                 & 211 & DROP REWRITE EQUIVALENCE     \\
-85   & TRUNCATE TABLE               & 212 & CREATE EDITION               \\
-86   & TRUNCATE CLUSTER             & 213 & ALTER EDITION                \\
-88   & ALTER VIEW                   & 214 & DROP EDITION                 \\
-91   & CREATE FUNCTION              & 215 & DROP ASSEMBLY                \\
-92   & ALTER FUNCTION               & 216 & CREATE ASSEMBLY              \\
-93   & DROP FUNCTION                & 217 & ALTER ASSEMBLY               \\
-94   & CREATE PACKAGE               & 218 & CREATE FLASHBACK ARCHIVE     \\
-95   & ALTER PACKAGE                & 219 & ALTER FLASHBACK ARCHIVE      \\
-96   & DROP PACKAGE                 & 220 & DROP FLASHBACK ARCHIVE       \\
-97   & CREATE PACKAGE BODY          & 225 & ALTER DATABASE LINK          \\
-98   & ALTER PACKAGE BODY           & 226 & CREATE PLUGGABLE DATABASE    \\
-99   & DROP PACKAGE BODY            & 227 & ALTER PLUGGABLE DATABASE     \\
-100  & LOGON                        & 228 & DROP PLUGGABLE DATABASE      \\
-101  & LOGOFF                       & 229 & CREATE AUDIT POLICY          \\
-102  & LOGOFF BY CLEANUP            & 230 & ALTER AUDIT POLICY           \\
-103  & SESSION REC                  & 231 & DROP AUDIT POLICY            \\
-104  & SYSTEM AUDIT                 & 232 & CODE-BASED GRANT             \\
-105  & SYSTEM NOAUDIT               & 233 & CODE-BASED REVOKE            \\
-106  & AUDIT DEFAULT                & 238 & ADMINISTER KEY MANAGEMENT    \\
-107  & NOAUDIT DEFAULT              & 239 & CREATE MATERIALIZED ZONEMAP  \\
-108  & SYSTEM GRANT                 & 240 & ALTER MATERIALIZED ZONEMAP   \\
-109  & SYSTEM REVOKE                & 241 & DROP MATERIALIZED ZONEMAP    \\
-110  & CREATE PUBLIC SYNONYM        & 305 & ALTER PUBLIC DATABASE LINK   \\
+0   & UNKNOWN                      & 1   & CREATE TABLE                 \\
+2   & INSERT                       & 3   & SELECT                       \\
+4   & CREATE CLUSTER               & 5   & ALTER CLUSTER                \\
+6   & UPDATE                       & 7   & DELETE                       \\
+8   & DROP CLUSTER                 & 9   & CREATE INDEX                 \\
+10  & DROP INDEX                   & 11  & ALTER INDEX                  \\
+12  & DROP TABLE                   & 13  & CREATE SEQUENCE              \\
+14  & ALTER SEQUENCE               & 15  & ALTER TABLE                  \\
+16  & DROP SEQUENCE                & 17  & GRANT OBJECT                 \\
+18  & REVOKE OBJECT                & 19  & CREATE SYNONYM               \\
+20  & DROP SYNONYM                 & 21  & CREATE VIEW                  \\
+22  & DROP VIEW                    & 23  & VALIDATE INDEX               \\
+24  & CREATE PROCEDURE             & 25  & ALTER PROCEDURE              \\
+26  & LOCK                         & 27  & NO-OP                        \\
+28  & RENAME                       & 29  & COMMENT                      \\
+30  & AUDIT OBJECT                 & 31  & NOAUDIT OBJECT               \\
+32  & CREATE DATABASE LINK         & 33  & DROP DATABASE LINK           \\
+34  & CREATE DATABASE              & 35  & ALTER DATABASE               \\
+36  & CREATE ROLLBACK SEG          & 37  & ALTER ROLLBACK SEG           \\
+38  & DROP ROLLBACK SEG            & 39  & CREATE TABLESPACE            \\
+40  & ALTER TABLESPACE             & 41  & DROP TABLESPACE              \\
+42  & ALTER SESSION                & 43  & ALTER USER                   \\
+44  & COMMIT                       & 45  & ROLLBACK                     \\
+46  & SAVEPOINT                    & 47  & PL/SQL EXECUTE               \\
+48  & SET TRANSACTION              & 49  & ALTER SYSTEM                 \\
+50  & EXPLAIN                      & 51  & CREATE USER                  \\
+52  & CREATE ROLE                  & 53  & DROP USER                    \\
+54  & DROP ROLE                    & 55  & SET ROLE                     \\
+56  & CREATE SCHEMA                & 57  & CREATE CONTROL FILE          \\
+59  & CREATE TRIGGER               & 60  & ALTER TRIGGER                \\
+61  & DROP TRIGGER                 & 62  & ANALYZE TABLE                \\
+63  & ANALYZE INDEX                & 64  & ANALYZE CLUSTER              \\
+65  & CREATE PROFILE               & 66  & DROP PROFILE                 \\
+67  & ALTER PROFILE                & 68  & DROP PROCEDURE               \\
+70  & ALTER RESOURCE COST          & 71  & CREATE MATERIALIZED VIEW LOG \\
+72  & ALTER MATERIALIZED VIEW LOG  & 73  & DROP MATERIALIZED VIEW LOG   \\
+74  & CREATE MATERIALIZED VIEW     & 75  & ALTER MATERIALIZED VIEW      \\
+76  & DROP MATERIALIZED VIEW       & 77  & CREATE TYPE                  \\
+78  & DROP TYPE                    & 79  & ALTER ROLE                   \\
+80  & ALTER TYPE                   & 81  & CREATE TYPE BODY             \\
+82  & ALTER TYPE BODY              & 83  & DROP TYPE BODY               \\
+84  & DROP LIBRARY                 & 85  & TRUNCATE TABLE               \\
+86  & TRUNCATE CLUSTER             & 88  & ALTER VIEW                   \\
+90  & SET CONSTRAINTS              & 91  & CREATE FUNCTION              \\
+92  & ALTER FUNCTION               & 93  & DROP FUNCTION                \\
+94  & CREATE PACKAGE               & 95  & ALTER PACKAGE                \\
+96  & DROP PACKAGE                 & 97  & CREATE PACKAGE BODY          \\
+98  & ALTER PACKAGE BODY           & 99  & DROP PACKAGE BODY            \\
+100 & LOGON                        & 101 & LOGOFF                       \\
+102 & LOGOFF BY CLEANUP            & 103 & SESSION REC                  \\
+104 & SYSTEM AUDIT                 & 105 & SYSTEM NOAUDIT               \\
+106 & AUDIT DEFAULT                & 107 & NOAUDIT DEFAULT              \\
+108 & SYSTEM GRANT                 & 109 & SYSTEM REVOKE                \\
+110 & CREATE PUBLIC SYNONYM        & 111 & DROP PUBLIC SYNONYM          \\
+112 & CREATE PUBLIC DATABASE LINK  & 113 & DROP PUBLIC DATABASE LINK    \\
+114 & GRANT ROLE                   & 115 & REVOKE ROLE                  \\
+116 & EXECUTE PROCEDURE            & 117 & USER COMMENT                 \\
+118 & ENABLE TRIGGER               & 119 & DISABLE TRIGGER              \\
+120 & ENABLE ALL TRIGGERS          & 121 & DISABLE ALL TRIGGERS         \\
+122 & NETWORK ERROR                & 123 & EXECUTE TYPE                 \\
+125 & READ DIRECTORY               & 126 & WRITE DIRECTORY              \\
+128 & FLASHBACK                    & 129 & CREATE SESSION               \\
+130 & ALTER MINING MODEL           & 131 & SELECT MINING MODEL          \\
+133 & CREATE MINING MODEL          & 134 & ALTER PUBLIC SYNONYM         \\
+135 & DIRECTORY EXECUTE            & 136 & SQL*LOADER DIRECT PATH LOAD  \\
+137 & DATAPUMP DIRECT PATH UNLOAD  & 138 & DATABASE STARTUP             \\
+139 & DATABASE SHUTDOWN            & 140 & CREATE SQL TXLN PROFILE      \\
+141 & ALTER SQL TXLN PROFILE       & 142 & USE SQL TXLN PROFILE         \\
+143 & DROP SQL TXLN PROFILE        & 144 & CREATE MEASURE FOLDER        \\
+145 & ALTER MEASURE FOLDER         & 146 & DROP MEASURE FOLDER          \\
+147 & CREATE CUBE BUILD PROCESS    & 148 & ALTER CUBE BUILD PROCESS     \\
+149 & DROP CUBE BUILD PROCESS      & 150 & CREATE CUBE                  \\
+151 & ALTER CUBE                   & 152 & DROP CUBE                    \\
+153 & CREATE CUBE DIMENSION        & 154 & ALTER CUBE DIMENSION         \\
+155 & DROP CUBE DIMENSION          & 157 & CREATE DIRECTORY             \\
+158 & DROP DIRECTORY               & 159 & CREATE LIBRARY               \\
+160 & CREATE JAVA                  & 161 & ALTER JAVA                   \\
+162 & DROP JAVA                    & 163 & CREATE OPERATOR              \\
+164 & CREATE INDEXTYPE             & 165 & DROP INDEXTYPE               \\
+166 & ALTER INDEXTYPE              & 167 & DROP OPERATOR                \\
+168 & ASSOCIATE STATISTICS         & 169 & DISASSOCIATE STATISTICS      \\
+170 & CALL METHOD                  & 171 & CREATE SUMMARY               \\
+172 & ALTER SUMMARY                & 173 & DROP SUMMARY                 \\
+174 & CREATE DIMENSION             & 175 & ALTER DIMENSION              \\
+176 & DROP DIMENSION               & 177 & CREATE CONTEXT               \\
+178 & DROP CONTEXT                 & 179 & ALTER OUTLINE                \\
+180 & CREATE OUTLINE               & 181 & DROP OUTLINE                 \\
+182 & UPDATE INDEXES               & 183 & ALTER OPERATOR               \\
+187 & CREATE SPFILE                & 188 & CREATE PFILE                 \\
+189 & MERGE                        & 190 & PASSWORD CHANGE              \\
+192 & ALTER SYNONYM                & 193 & ALTER DISKGROUP              \\
+194 & CREATE DISKGROUP             & 195 & DROP DISKGROUP               \\
+197 & PURGE USER\_RECYCLEBIN       & 198 & PURGE DBA\_RECYCLEBIN        \\
+199 & PURGE TABLESPACE             & 200 & PURGE TABLE                  \\
+201 & PURGE INDEX                  & 202 & UNDROP OBJECT                \\
+202 & UNDROP OBJECT                & 203 & DROP DATABASE                \\
+204 & FLASHBACK DATABASE           & 205 & FLASHBACK TABLE              \\
+206 & CREATE RESTORE POINT         & 207 & DROP RESTORE POINT           \\
+208 & PROXY AUTHENTICATION ONLY    & 209 & DECLARE REWRITE EQUIVALENCE  \\
+210 & ALTER REWRITE EQUIVALENCE    & 211 & DROP REWRITE EQUIVALENCE     \\
+212 & CREATE EDITION               & 213 & ALTER EDITION                \\
+214 & DROP EDITION                 & 215 & DROP ASSEMBLY                \\
+216 & CREATE ASSEMBLY              & 217 & ALTER ASSEMBLY               \\
+218 & CREATE FLASHBACK ARCHIVE     & 219 & ALTER FLASHBACK ARCHIVE      \\
+220 & DROP FLASHBACK ARCHIVE       & 221 & DEBUG CONNECT                \\
+223 & DEBUG PROCEDURE              & 225 & ALTER DATABASE LINK          \\
+226 & CREATE PLUGGABLE DATABASE    & 227 & ALTER PLUGGABLE DATABASE     \\
+228 & DROP PLUGGABLE DATABASE      & 229 & CREATE AUDIT POLICY          \\
+230 & ALTER AUDIT POLICY           & 231 & DROP AUDIT POLICY            \\
+232 & CODE-BASED GRANT             & 233 & CODE-BASED REVOKE            \\
+234 & CREATE LOCKDOWN PROFILE      & 235 & DROP LOCKDOWN PROFILE        \\
+236 & ALTER LOCKDOWN PROFILE       & 237 & TRANSLATE SQL                \\
+238 & ADMINISTER KEY MANAGEMENT    & 239 & CREATE MATERIALIZED ZONEMAP  \\
+240 & ALTER MATERIALIZED ZONEMAP   & 241 & DROP MATERIALIZED ZONEMAP    \\
+242 & DROP MINING MODEL            & 243 & CREATE ATTRIBUTE DIMENSION   \\
+244 & ALTER ATTRIBUTE DIMENSION    & 245 & DROP ATTRIBUTE DIMENSION     \\
+246 & CREATE HIERARCHY             & 247 & ALTER HIERARCHY              \\
+248 & DROP HIERARCHY               & 249 & CREATE ANALYTIC VIEW         \\
+250 & ALTER ANALYTIC VIEW          & 251 & DROP ANALYTIC VIEW           \\
+305 & ALTER PUBLIC DATABASE LINK   \\
 
 \bottomrule
 \end{longtable}
@@ -245,8 +272,7 @@ select action as code,
 from   audit_actions;
 \end{lstlisting}
 
-There are 212 different commands in Oracle 12c (12.1.0.2) while Oracle
-11g (11.2.0.4) has only (!) 181.
+There are 239 different command codes in Oracle 12.2.0.1, 212 in Oracle 12.1.0.2 while Oracle 11g (11.2.0.4) has only (!) 181.
 
 %------------------------------------------------------------------------------
 \chapter{Oracle Characterset Codes}\label{oracle-characterset-codes}
@@ -265,7 +291,7 @@ and    parameter = 'CHARACTERSET'
 order  by nls_charset_id(value);
 \end{lstlisting}
 
-The values that you may see here are as follows, taken from an Oracle 12.1.0.1 database where there are 222 character sets listed:
+The values that you may see here are as follows, taken from an Oracle 12.2.0.1 database where there are 222 character sets listed, the same number as in Oracle 12.1.0.1.
 
 
 \begin{longtable}[]{@{}rl|rl|rl@{}}
