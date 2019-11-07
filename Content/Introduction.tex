@@ -112,9 +112,9 @@ The moral to this tale is simple, you cannot be sure that all the \inline{EXEC}s
 
 Following on from the above, the same SQL statement \emph{can} (and does) have the ability to be executed under any number of \emph{different} Cursor IDs! How is this possible?
 
-If your statement uses bind variables, then given a recent version of Oracle, something called \emph{Bind Variable Peeking} may be in use to ensure that a statement has the most efficient plan of execution regardless of the bind variable values. In the good old days, whatever bind value got in first determined the execution plan for every other \inline{EXEC} of that statement, even if it made the execution plan completely hopeless for most values that followed.
+If your statement uses bind variables, then given a recent enough version of Oracle, something called \emph{Bind Variable Peeking} or \emph{Adaptive Cursor Sharing} may be in use to ensure that a statement has the most efficient plan of execution regardless of the bind variable values in use, or changes to them between executions. In the good old days, whatever bind value got in first determined the execution plan for every other \inline{EXEC} of that statement, even if it made the execution plan completely hopeless for most values that followed.
 
-\emph{I think} - because I have not checked - that this means that certain statements and bind combinations will cause a number of separate child cursors, and thus, different Cursor IDs in the trace file, for the same statement. A recent trace file I examined had 15 different Cursor IDs for the same statement. 
+\emph{Adaptive Cursor Sharing}, for certain bind values, will cause a number of separate child cursors, and thus, different Cursor IDs in the trace file, for the same statement (ie, the same \emph{sql\_id}). A recent trace file I examined had 15 different Cursor IDs for the same statement. 
 
 I knew they were all the same as the \inline{PARSING IN CURSOR} line has the \inline{sqlid} at the end, and although the Cursor IDs were different, the SQL Text and such like were all the same and so was the \inline{sqlid} so it \emph{had} to be the same SQL statement, just with numerous child cursors. Beware of this when looking in trace files!
 
