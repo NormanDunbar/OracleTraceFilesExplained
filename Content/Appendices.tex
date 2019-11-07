@@ -275,11 +275,11 @@ from   audit_actions;
 There are 239 different command codes in Oracle 12.2.0.1, 212 in Oracle 12.1.0.2 while Oracle 11g (11.2.0.4) has only (!) 181.
 
 %------------------------------------------------------------------------------
-\chapter{Oracle Characterset Codes}\label{oracle-characterset-codes}
+\chapter{Oracle Character Set Codes}\label{oracle-characterset-codes}
 %------------------------------------------------------------------------------
 \index{Oracle Character Set Codes}
 
-\section*{Bind Charactersets}\label{bind-charactersets}
+\section*{Bind Character Sets}\label{bind-charactersets}
 
 Some data types use different character sets. These are coded in the \inline{csi} field in the bind details lines of the trace file. You can extract the list of current character set codes and names with the following query:
 
@@ -383,15 +383,15 @@ Code & Character Set & Code & Character Set & Code & Character Set \\
 \bottomrule
 \end{longtable}
 
-If you see a character set code in the \inline{csi} field, and you don't have the above list, you can determine the characterset in use with the following query:
+If you see a character set code in the \inline{csi} field, and you don't have the above list, you can determine the character set in use with the following query:
 
 \begin{lstlisting}[language=SQL,caption={SQL Query to Convert a \inline{csi} Code to a Charcter Set Name}]
 SELECT NLS_CHARSET_NAME(1) FROM dual;
 \end{lstlisting}
 
-Correspondingly, you can go from a charcter set name to its \inline{csi} code with the following query:
+Correspondingly, you can go from a character set name to its \inline{csi} code with the following query:
 
-\begin{lstlisting}[language=SQL,caption={SQL Query to Convert a Charcter Set Name  to a \inline{csi} Code}]
+\begin{lstlisting}[language=SQL,caption={SQL Query to Convert a Charcter Set Name to a \inline{csi} Code}]
 SELECT NLS_CHARSET_ID('US7ASCII') FROM dual;
 \end{lstlisting}
 
@@ -538,7 +538,5 @@ However, you can, if you have a standard report format at your company,
 configure the generated css file to match that of your format.
 \emph{TraceMiner2}\program{TraceMiner2} will not overwrite the css file if one exists in the
 output folder.
-
-
 
 \end{appendix}

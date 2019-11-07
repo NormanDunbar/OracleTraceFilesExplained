@@ -37,7 +37,7 @@ The last line, consisting of equals signs, is the separator between the header a
 
 In Oracle versions before 10g, the latter chunk of text is not found, the one detailing session, client, module etc, those first appeared at 10g.
 
-Oracle 12c introduced us to the concept of \emph{Pluggable Databases}, so obvioulsy, the trace file headers had to change. The following is an example of a 12.2.0.1 trace file header for a pluggable database.
+Oracle 12c introduced us to the concept of \emph{Pluggable Databases}, so obviously, the trace file headers had to change. The following is an example of a 12.2.0.1 trace file header for a pluggable database.
 
 \begin{lstlisting}[numbers=none,caption={Oracle 12c Trace File Header}]
 Trace file /u01/app/oracle/diag/rdbms/trkpre_lhr38r/orcl12c/trace/ORCL12C_ora_17361_NORM2.trc
@@ -69,9 +69,9 @@ Unix process pid: 17361, image: oracle@cloud_01
 Some points to note here are:
 
 \begin{itemize}
-	\item Timestamps are now in the ISO standard format and show the time zone offset from UTC/GMT as well as separating the date form the time with `T';
-	\item Timestamp lines now show the container name and container id - ``ORCLPDB(3)'' in the above example;
-	\item PLus a few other additional lines.
+	\item Timestamps are now in the ISO standard format and show the time zone offset from UTC/GMT as well as separating the date from the time with `T';
+	\item Timestamp lines now show the container name and container id\footnote{Oracle can be irritating at times. The \emph{container} is the main database, the \emph{pluggable} is the, well, pluggable. Why does the \emph{pluggable} database get referred to as the \emph{container} I wonder?} - ``ORCLPDB(3)'' in the above example;
+	\item Plus a few other additional lines.
 \end{itemize}
 
 The above example is taken from a database running on Oracle Linux 7.
@@ -147,7 +147,7 @@ One line that you should be interested in is this one from the header above:
 *** 2017-06-27 13:56:36.872
 \end{lstlisting}
 
-or this line, from a 12c database trace file (not shown here):
+alternatively, from the 12c database trace file header also shown above:
 
 \begin{lstlisting}[numbers=none,caption={12c Time Stamp Line}]
 *** 2019-11-06T13:10:13.148529+00:00 (ORCLPDB(3))
@@ -502,7 +502,7 @@ The Oracle error code that caused the parse to fail.\strut
 
 In this case, there was an error \inline{ORA-01031: insufficient privileges} as the user parsing the statement did not have the required privileges to see the table in question.
 
-The \inline{uid} field references the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
+The \inline{uid} and \inline{lid} fields reference the column \inline{USER\_ID} in the views \inline{DBA\_USERS}, \inline{ALL\_USERS} and \inline{USER\_USERS}.
 
 \newpage\section{EXEC}\label{exec}\traceline{EXEC}
 
@@ -720,7 +720,7 @@ You may wish to refer back to page \pageref{block-details} for details of the \i
 
 \newpage\section{WAIT}\label{wait}\traceline{WAIT}
 
-This is the meat of the trace file, usually. Under normal circumstances, it's usual for the various phases of execution (\inline{PARSE}, \inline{EXEC} and \inline{FETCH}) to encounter some \inline{WAIT} events. And I would say, personally\footnote{Beware of   small sample sizes!}, that these \inline{WAIT} states are where the vast majority of the total response time is encountered.
+This is the meat of the trace file, usually. Under normal circumstances, it's usual for the various phases of execution (\inline{PARSE}, \inline{EXEC} and \inline{FETCH}) to encounter some \inline{WAIT} events. And I would say, personally\footnote{Beware of small sample sizes!}, that these \inline{WAIT} states are where the vast majority of the total response time is encountered.
 
 A \inline{WAIT} line in the trace file will resemble the following example, up until Oracle 9i at the latest:
 
